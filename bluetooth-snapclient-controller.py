@@ -65,8 +65,11 @@ class Bluetooth:
 
 def on_connect(client, userdata, flags, rc):
     client.message_callback_add(f'bluetooth/{site_id}/devicesDiscover', bl.discover)
+    client.message_callback_add(f'bluetooth/{site_id}/deviceConnect', bl.connect)
     client.message_callback_add('bluetooth/update/requestDeviceLists', bl.send_device_lists)
     client.subscribe(f'bluetooth/{site_id}/devicesDiscover')
+    client.subscribe(f'bluetooth/{site_id}/deviceConnect')
+    client.subscribe('bluetooth/update/requestDeviceLists')
     bl.send_device_lists()
 
 
