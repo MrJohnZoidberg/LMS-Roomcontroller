@@ -22,11 +22,10 @@ class Bluetoothctl:
         #if self.process.expect(["bluetooth", pexpect.TIMEOUT, pexpect.EOF]):
         #    raise Exception(f"failed after {command}")
 
-    def get_output(self, *args, **kwargs):
+    def get_output(self, command):
         """Run a command in bluetoothctl prompt, return output as a list of lines."""
-        self.send(*args, **kwargs)
-        if self.process.expect(["bluetooth", pexpect.TIMEOUT, pexpect.EOF]):
-            raise Exception(f"failed")
+        self.send(command)
+        self.process.expect(["bluetooth", pexpect.EOF])
         return self.process.before.split("\r\n")
 
     def start_discover(self):
