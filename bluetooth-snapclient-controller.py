@@ -25,6 +25,12 @@ class Bluetooth:
         self.threadobj_remove = None
         self.ctl = blctl.Bluetoothctl()
 
+    def send_device_lists(self):
+        payload = {'available_devices': self.ctl.get_available_devices(),
+                   'paired_devices': self.ctl.get_paired_devices(),
+                   'siteId': site_id}
+        mqtt_client.publish('bluetooth/update/deviceLists', payload=json.dumps(payload))
+
     def thread_discover(self):
         result = self.ctl.start_discover()
         payload = {'siteId': site_id, 'result': result}
@@ -33,24 +39,34 @@ class Bluetooth:
             return
         for i in range(30):
             time.sleep(1)
+        self.send_device_lists()
         payload = {'discoverable_devices': self.ctl.get_discoverable_devices(),
-                   'paired_devices': self.ctl.get_paired_devices(),
                    'siteId': site_id}
         mqtt_client.publish(f'bluetooth/result/{site_id}/devicesDiscovered', payload=json.dumps(payload))
 
+    def thread_connect(self, addr):
+        result = self.ctl.connect(addr)
+        if result:
+            self.send_device_lists()
+        payload = {'siteId': site_id, 'result': result, 'addr': addr}
+        mqtt_client.publish(f'bluetooth/result/{site_id}/deviceConnect', payload=json.dumps(payload))
+
     def discover(self, client, userdata, msg):
-        data = json.loads(msg.payload.decode("utf-8"))
         if self.threadobj_discover:
             del self.threadobj_discover
         self.threadobj_discover = threading.Thread(target=self.thread_discover)
 
-    def connect(self):
-        pass
+    def connect(self, client, userdata, msg):
+        data = json.loads(msg.payload.decode("utf-8"))
+        if self.threadobj_connect:
+            del self.threadobj_connect
+        self.threadobj_connect = threading.Thread(target=self.thread_connect, args=(data['addr'],))
 
 
 def on_connect(client, userdata, flags, rc):
     client.message_callback_add(f'bluetooth/{site_id}/devicesDiscover', bl.discover)
     client.subscribe(f'bluetooth/{site_id}/devicesDiscover')
+    bl.send_device_lists()
 
 
 if __name__ == "__main__":
