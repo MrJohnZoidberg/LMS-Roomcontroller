@@ -1,4 +1,3 @@
 toml
-configparser
 paho-mqtt
 pexpect

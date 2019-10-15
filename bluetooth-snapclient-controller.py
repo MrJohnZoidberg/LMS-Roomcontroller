@@ -4,24 +4,12 @@ import paho.mqtt.client as mqtt
 import json
 import toml
 import threading
-import configparser
 import blctl
 import time
 
 MQTT_BROKER_ADDRESS = "localhost:1883"
 MQTT_USERNAME = None
 MQTT_PASSWORD = None
-
-
-def read_configuration_file(configuration_file):
-    try:
-        cp = configparser.ConfigParser()
-        with open(configuration_file, encoding="utf-8") as f:
-            cp.read_file(f)
-        return {section: {option_name: option for option_name, option in cp.items(section)}
-                for section in cp.sections()}
-    except (IOError, configparser.Error):
-        return dict()
 
 
 class Snapclient:
@@ -66,7 +54,7 @@ def on_connect(client, userdata, flags, rc):
 
 
 if __name__ == "__main__":
-    config = read_configuration_file('config.ini')
+    config = toml.load('config.toml')
     if 'mqtt' in config['snips-common']:
         MQTT_BROKER_ADDRESS = config['snips-common']['mqtt']
     if 'mqtt_username' in config['snips-common']:
