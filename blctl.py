@@ -65,6 +65,10 @@ class Bluetoothctl:
                     }
         return device
 
+    def wait_for_disconnect(self, addr):
+        self.process.expect([r"04:FE:A1:CF:AE:49 Connected: no"], timeout=20)
+        print("Disconnectedddddd")
+
     def get_available_devices(self):
         """Return a list of tuples of paired and discoverable devices."""
         available_devices = []
