@@ -25,12 +25,6 @@ class Bluetooth:
         self.threadobj_remove = None
         self.ctl = blctl.Bluetoothctl()
 
-    def send_device_lists(self):
-        payload = {'available_devices': self.ctl.get_available_devices(),
-                   'paired_devices': self.ctl.get_paired_devices(),
-                   'siteId': site_id}
-        mqtt_client.publish('bluetooth/update/deviceLists', payload=json.dumps(payload))
-
     def thread_discover(self):
         result = self.ctl.start_discover()
         payload = {'siteId': site_id, 'result': result}
@@ -62,9 +56,16 @@ class Bluetooth:
             del self.threadobj_connect
         self.threadobj_connect = threading.Thread(target=self.thread_connect, args=(data['addr'],))
 
+    def send_device_lists(self, client=None, userdata=None, msg=None):
+        payload = {'available_devices': self.ctl.get_available_devices(),
+                   'paired_devices': self.ctl.get_paired_devices(),
+                   'siteId': site_id}
+        mqtt_client.publish('bluetooth/update/deviceLists', payload=json.dumps(payload))
+
 
 def on_connect(client, userdata, flags, rc):
     client.message_callback_add(f'bluetooth/{site_id}/devicesDiscover', bl.discover)
+    client.message_callback_add('bluetooth/update/requestDeviceLists', bl.send_device_lists)
     client.subscribe(f'bluetooth/{site_id}/devicesDiscover')
     bl.send_device_lists()
 
