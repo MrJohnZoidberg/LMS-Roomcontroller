@@ -14,7 +14,7 @@ class Bluetoothctl:
     """A wrapper for bluetoothctl utility."""
 
     def __init__(self):
-        self.process = pexpect.spawnu("bluetoothctl", echo=False)
+        self.process = pexpect.spawnu("bluetoothctl", echo=False, timeout=8)
 
     def send(self, command, pause=0):
         self.process.send(f"{command}\n")

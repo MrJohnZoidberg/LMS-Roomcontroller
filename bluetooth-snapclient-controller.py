@@ -42,7 +42,8 @@ class Bluetooth:
         print("Started")
         result = self.ctl.connect(addr)
         if result:
-            time.sleep(2)
+            print("Send list")
+            time.sleep(5)
             self.send_device_lists()
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/{site_id}/deviceConnect', payload=json.dumps(payload))
