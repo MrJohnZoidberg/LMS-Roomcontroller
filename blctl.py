@@ -172,7 +172,6 @@ class Bluetoothctl:
             logger.error(e)
             return False
         else:
-            self.process.expect()
             res = self.process.expect(
                 ["Failed to connect", "Connection successful", pexpect.EOF, pexpect.TIMEOUT]
             )
