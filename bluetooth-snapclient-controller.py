@@ -60,6 +60,7 @@ class Bluetooth:
         payload = {'available_devices': self.ctl.get_available_devices(),
                    'paired_devices': self.ctl.get_paired_devices(),
                    'siteId': site_id}
+        print(payload)
         mqtt_client.publish('bluetooth/update/deviceLists', payload=json.dumps(payload))
 
 
