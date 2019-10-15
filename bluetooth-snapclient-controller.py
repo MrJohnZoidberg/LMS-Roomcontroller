@@ -49,12 +49,14 @@ class Bluetooth:
         if self.threadobj_discover:
             del self.threadobj_discover
         self.threadobj_discover = threading.Thread(target=self.thread_discover)
+        self.threadobj_discover.start()
 
     def connect(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
         if self.threadobj_connect:
             del self.threadobj_connect
         self.threadobj_connect = threading.Thread(target=self.thread_connect, args=(data['addr'],))
+        self.threadobj_connect.start()
 
     def send_device_lists(self, client=None, userdata=None, msg=None):
         payload = {'available_devices': self.ctl.get_available_devices(),
