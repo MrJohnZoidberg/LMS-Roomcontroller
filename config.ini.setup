@@ -1,0 +1,7 @@
+[snips-common]
+mqtt = "localhost:1883"
+# mqtt_username = ""
+# mqtt_password = ""
+
+[device]
+site_id = "default"
