@@ -170,7 +170,7 @@ class Bluetoothctl:
         try:
             #self.process.send(f"connect {mac_address}\n")
             #time.sleep(2)
-            self.send(f"connect {mac_address}\n", 2)
+            self.send(f"connect {mac_address}\n", 3)
         except Exception as e:
             logger.error(e)
             return False
