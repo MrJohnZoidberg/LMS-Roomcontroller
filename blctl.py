@@ -166,8 +166,9 @@ class Bluetoothctl:
     def connect(self, mac_address):
         """Try to connect to a device by mac address."""
         try:
-            self.process.send(f"connect {mac_address}\n")
-            time.sleep(2)
+            #self.process.send(f"connect {mac_address}\n")
+            #time.sleep(2)
+            self.send(f"connect {mac_address}\n", 2)
         except Exception as e:
             logger.error(e)
             return False
