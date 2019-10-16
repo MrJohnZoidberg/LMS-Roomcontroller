@@ -27,8 +27,20 @@ class SnapclientControll:
 
     @staticmethod
     def is_active(soundcard):
-        expect_list = [r"active \(running\)", r"inactive \(dead\)"]
+        expect_list = [r"active \(running\)", r"inactive \(dead\)", "could not be found"]
         result = pexpect.spawnu(f"systemctl status snapclient@{soundcard}").expect(expect_list) == 0
+        return result
+
+    @staticmethod
+    def start(soundcard):
+        expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
+        result = pexpect.spawnu(f"systemctl start snapclient@{soundcard}").expect(expect_list, 5) == 0
+        return result
+
+    @staticmethod
+    def stop(soundcard):
+        expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
+        result = pexpect.spawnu(f"systemctl stop snapclient@{soundcard}").expect(expect_list, 6) == 0
         return result
 
 
@@ -53,7 +65,11 @@ class Bluetooth:
         if addr in self.connected_addresses:
             self.connected_addresses = [addr for addr in self.connected_addresses if not addr]
             # TODO: Stop Snapclient service
-            print("Stop Snapclient@{}".format(sc.get_soundcard(self.get_name_from_addr(addr))))
+            print("Is active", sc.is_active(sc.get_soundcard(self.get_name_from_addr(addr))))
+            print("Start", sc.start(sc.get_soundcard(self.get_name_from_addr(addr))))
+            time.sleep(5)
+            print("Is active", sc.is_active(sc.get_soundcard(self.get_name_from_addr(addr))))
+            print("Stop", sc.stop(sc.get_soundcard(self.get_name_from_addr(addr))))
             print("Is active", sc.is_active(sc.get_soundcard(self.get_name_from_addr(addr))))
             self.send_device_lists()
             payload = {'siteId': site_id, 'result': True, 'addr': addr}
