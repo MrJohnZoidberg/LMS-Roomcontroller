@@ -34,7 +34,7 @@ class SnapclientControll:
     @staticmethod
     def start(soundcard):
         expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
-        result = pexpect.spawnu(f"systemctl restart snapclient@{soundcard}").expect(expect_list, 5) == 0
+        result = pexpect.spawnu(f"systemctl restart -f snapclient@{soundcard}").expect(expect_list, 4) == 0
         if result:
             print(f"Successfully started Snapclient with soundcard <{soundcard}>.")
         else:
@@ -43,7 +43,7 @@ class SnapclientControll:
     @staticmethod
     def stop(soundcard):
         expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
-        result = pexpect.spawnu(f"systemctl stop snapclient@{soundcard}").expect(expect_list, 6) == 0
+        result = pexpect.spawnu(f"systemctl stop -f snapclient@{soundcard}").expect(expect_list, 4) == 0
         if result:
             print(f"Successfully stopped Snapclient with soundcard <{soundcard}>.")
         else:
@@ -60,14 +60,15 @@ class Bluetooth:
         self.threadobj_remove = None
         self.threadobjs_wait_disconnect = dict()
         self.connected_addresses = list()
+        self.connected_devices = dict()
         self.ctl = blctl.Bluetoothctl()
 
     def thread_wait_until_disconnect(self, addr):
         self.ctl.wait_for_disconnect(addr)
-        if addr in self.connected_addresses:
-            self.connected_addresses = [addr for addr in self.connected_addresses if not addr]
+        if addr in self.connected_devices:
+            del self.connected_devices[addr]
             self.send_device_lists()
-            sc.stop(sc.get_soundcard(self.ctl.get_device_name(addr)))
+            sc.stop(sc.get_soundcard(self.connected_devices[addr]))
             payload = {'siteId': site_id, 'result': True, 'addr': addr}
             mqtt_client.publish(f'bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
 
@@ -87,25 +88,30 @@ class Bluetooth:
     def thread_connect(self, addr):
         result = self.ctl.connect(addr)
         if result:
-            if addr not in self.connected_addresses:
-                self.connected_addresses.append(addr)
+            if addr not in self.connected_devices:
+                name = [d['name'] for d in self.ctl.get_available_devices() if d['mac_address'] == addr][0]
+                self.connected_devices[addr] = name
+            #if addr not in self.connected_addresses:
+            #    self.connected_addresses.append(addr)
             self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
                                                                      args=(addr,))
             self.threadobjs_wait_disconnect[addr].start()
             self.send_device_lists()
-            #sc.start(sc.get_soundcard(self.ctl.get_device_name(addr)))
+            sc.start(sc.get_soundcard(self.connected_devices[addr]))
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceConnect', payload=json.dumps(payload))
 
     def thread_disconnect(self, addr):
         result = self.ctl.disconnect(addr)
         if result:
-            if addr in self.connected_addresses:
-                self.connected_addresses = [addr for addr in self.connected_addresses if not addr]
+            if addr in self.connected_devices:
+                del self.connected_devices[addr]
+            #if addr in self.connected_addresses:
+            #    self.connected_addresses = [addr for addr in self.connected_addresses if not addr]
             self.send_device_lists()
             if addr in self.threadobjs_wait_disconnect and self.threadobjs_wait_disconnect[addr]:
                 del self.threadobjs_wait_disconnect[addr]
-            sc.stop(sc.get_soundcard(self.ctl.get_device_name(addr)))
+            sc.stop(sc.get_soundcard(self.connected_devices[addr]))
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
 
