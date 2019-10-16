@@ -65,6 +65,7 @@ class Bluetooth:
 
     def thread_wait_until_disconnect(self, addr):
         self.ctl.wait_for_disconnect(addr)
+        time.sleep(2)
         if addr in self.connected_devices:
             sc.stop(sc.get_soundcard(self.connected_devices[addr]))
             del self.connected_devices[addr]
