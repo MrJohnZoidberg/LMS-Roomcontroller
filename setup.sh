@@ -1,9 +1,16 @@
 #!/bin/bash
 
 # Copy config.ini.default if config.ini doesn't exist.
-if [ ! -e config.ini ]
-then
+if [ ! -e config.ini ]; then
     cp config.toml.setup config.toml
+else
+    user_line=$(sed '3q;d' config.ini)
+    user_version=${user_line//[!0-9]/}
+    setup_line=$(sed '3q;d' config.ini)
+    setup_version=${setup_line//[!0-9]/}
+    if [ "$user_version" -lt "$setup_version" ]; then
+        echo "hello"
+    fi
 fi
 
 PYTHON=$(command -v python3)

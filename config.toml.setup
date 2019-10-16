@@ -1,8 +1,12 @@
+# This is the configuration file for the Bluetooth- and Snapclient-Controller.
+# You can adjust all values after the "=" according to your wishes.
+version = 1  # Do not delete this line, it's for Git update and setup.sh
+
 [snips-common]
-mqtt = "localhost:1883"
-# mqtt_username = ""
-# mqtt_password = ""
+mqtt = "localhost:1883"  # "host:port"
+# mqtt_username = ""  # "username"
+# mqtt_password = ""  # "password"
 
 [device]
-site_id = "default"
-soundcards = "Kombo_22:bluetooth_speaker,MDR-1000X:bluetooth_headphones"
+site_id = "default"  # "Site-ID"
+soundcards = "Kombo_22:bluetooth_speaker"  # "bluetooth_device_name:soundcard_name"
