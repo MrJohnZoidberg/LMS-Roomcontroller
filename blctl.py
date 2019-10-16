@@ -112,6 +112,14 @@ class Bluetoothctl:
         else:
             return out
 
+    def get_device_name(self, mac_address):
+        """Get device info by mac address."""
+        device_info = self.get_device_info(mac_address)
+        for line in device_info:
+            if 'Name: ' in line:
+                print(line)
+        return "Kombo_22"
+
     def pair(self, mac_address):
         """Try to pair with a device by mac address."""
         try:

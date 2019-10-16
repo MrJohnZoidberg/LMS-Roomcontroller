@@ -62,16 +62,12 @@ class Bluetooth:
         self.connected_addresses = list()
         self.ctl = blctl.Bluetoothctl()
 
-    def get_name_from_addr(self, addr):
-        addr_dict = {device['mac_address']: device['name'] for device in self.ctl.get_available_devices()}
-        return addr_dict[addr]
-
     def thread_wait_until_disconnect(self, addr):
         self.ctl.wait_for_disconnect(addr)
         if addr in self.connected_addresses:
             self.connected_addresses = [addr for addr in self.connected_addresses if not addr]
             self.send_device_lists()
-            sc.stop(sc.get_soundcard(self.get_name_from_addr(addr)))
+            sc.stop(sc.get_soundcard(self.ctl.get_device_name(addr)))
             payload = {'siteId': site_id, 'result': True, 'addr': addr}
             mqtt_client.publish(f'bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
 
@@ -97,7 +93,7 @@ class Bluetooth:
                                                                      args=(addr,))
             self.threadobjs_wait_disconnect[addr].start()
             self.send_device_lists()
-            sc.start(sc.get_soundcard(self.get_name_from_addr(addr)))
+            sc.start(sc.get_soundcard(self.ctl.get_device_name(addr)))
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceConnect', payload=json.dumps(payload))
 
@@ -109,7 +105,7 @@ class Bluetooth:
             self.send_device_lists()
             if self.threadobjs_wait_disconnect[addr]:
                 del self.threadobjs_wait_disconnect[addr]
-            sc.stop(sc.get_soundcard(self.get_name_from_addr(addr)))
+            sc.stop(sc.get_soundcard(self.ctl.get_device_name(addr)))
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
 
