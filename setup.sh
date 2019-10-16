@@ -4,9 +4,9 @@
 if [ ! -e config.toml ]; then
     cp config.toml.setup config.toml
 else
-    user_line=$(sed '3q;d' config.ini)
+    user_line=$(sed '3q;d' config.toml)
     user_version=${user_line//[!0-9]/}
-    setup_line=$(sed '3q;d' config.ini)
+    setup_line=$(sed '3q;d' config.toml)
     setup_version=${setup_line//[!0-9]/}
     if [ "$user_version" -lt "$setup_version" ]; then
         echo "hello"
