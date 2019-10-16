@@ -115,9 +115,9 @@ class Bluetoothctl:
     def get_device_name(self, mac_address):
         """Get device info by mac address."""
         device_info = self.get_device_info(mac_address)
+        print(device_info)
         for line in device_info:
-            if 'Name: ' in line:
-                print(line)
+            print(line)
         return "Kombo_22"
 
     def pair(self, mac_address):
