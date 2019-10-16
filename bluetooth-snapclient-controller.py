@@ -30,6 +30,8 @@ class Bluetooth:
         self.threadobj_discover = None
         self.threadobj_connect = None
         self.threadobj_disconnect = None
+        self.threadobj_trust = None
+        self.threadobj_untrust = None
         self.threadobj_remove = None
         self.threadobjs_wait_disconnect = dict()
         self.connected_addresses = list()
@@ -85,6 +87,16 @@ class Bluetooth:
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
 
+    def thread_trust(self, addr):
+        result = self.ctl.trust(addr)
+        payload = {'siteId': site_id, 'result': result, 'addr': addr}
+        mqtt_client.publish(f'bluetooth/result/deviceTrust', payload=json.dumps(payload))
+
+    def thread_untrust(self, addr):
+        result = self.ctl.untrust(addr)
+        payload = {'siteId': site_id, 'result': result, 'addr': addr}
+        mqtt_client.publish(f'bluetooth/result/deviceUntrust', payload=json.dumps(payload))
+
     def thread_remove(self, addr):
         result = self.ctl.remove(addr)
         if result:
@@ -112,6 +124,20 @@ class Bluetooth:
         self.threadobj_disconnect = threading.Thread(target=self.thread_disconnect, args=(data['addr'],))
         self.threadobj_disconnect.start()
 
+    def trust(self, client, userdata, msg):
+        data = json.loads(msg.payload.decode("utf-8"))
+        if self.threadobj_trust:
+            del self.threadobj_trust
+        self.threadobj_trust = threading.Thread(target=self.thread_trust, args=(data['addr'],))
+        self.threadobj_trust.start()
+
+    def untrust(self, client, userdata, msg):
+        data = json.loads(msg.payload.decode("utf-8"))
+        if self.threadobj_untrust:
+            del self.threadobj_untrust
+        self.threadobj_untrust = threading.Thread(target=self.thread_untrust, args=(data['addr'],))
+        self.threadobj_untrust.start()
+
     def remove(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
         if self.threadobj_remove:
@@ -130,12 +156,11 @@ def on_connect(client, userdata, flags, rc):
     client.message_callback_add(f'bluetooth/ask/{site_id}/devicesDiscover', bl.discover)
     client.message_callback_add(f'bluetooth/ask/{site_id}/deviceConnect', bl.connect)
     client.message_callback_add(f'bluetooth/ask/{site_id}/deviceDisconnect', bl.disconnect)
+    client.message_callback_add(f'bluetooth/ask/{site_id}/deviceTrust', bl.connect)
+    client.message_callback_add(f'bluetooth/ask/{site_id}/deviceUntrust', bl.connect)
     client.message_callback_add(f'bluetooth/ask/{site_id}/deviceRemove', bl.remove)
     client.message_callback_add('bluetooth/update/requestDeviceLists', bl.send_device_lists)
-    client.subscribe(f'bluetooth/ask/{site_id}/devicesDiscover')
-    client.subscribe(f'bluetooth/ask/{site_id}/deviceConnect')
-    client.subscribe(f'bluetooth/ask/{site_id}/deviceDisconnect')
-    client.subscribe(f'bluetooth/ask/{site_id}/deviceRemove')
+    client.subscribe(f'bluetooth/ask/{site_id}/#')
     client.subscribe('bluetooth/update/requestDeviceLists')
 
 
