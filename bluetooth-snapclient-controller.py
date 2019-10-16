@@ -103,7 +103,7 @@ class Bluetooth:
             if addr in self.connected_addresses:
                 self.connected_addresses = [addr for addr in self.connected_addresses if not addr]
             self.send_device_lists()
-            if self.threadobjs_wait_disconnect[addr]:
+            if addr in self.threadobjs_wait_disconnect and self.threadobjs_wait_disconnect[addr]:
                 del self.threadobjs_wait_disconnect[addr]
             sc.stop(sc.get_soundcard(self.ctl.get_device_name(addr)))
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
