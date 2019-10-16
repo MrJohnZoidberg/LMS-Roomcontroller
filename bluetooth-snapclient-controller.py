@@ -93,7 +93,7 @@ class Bluetooth:
                                                                      args=(addr,))
             self.threadobjs_wait_disconnect[addr].start()
             self.send_device_lists()
-            sc.start(sc.get_soundcard(self.ctl.get_device_name(addr)))
+            #sc.start(sc.get_soundcard(self.ctl.get_device_name(addr)))
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceConnect', payload=json.dumps(payload))
 
