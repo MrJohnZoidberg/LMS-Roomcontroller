@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # Copy config.ini.default if config.ini doesn't exist.
-if [ ! -e config.ini ]; then
+if [ ! -e config.toml ]; then
     cp config.toml.setup config.toml
-    echo "Hello2"
 else
     user_line=$(sed '3q;d' config.ini)
     user_version=${user_line//[!0-9]/}
