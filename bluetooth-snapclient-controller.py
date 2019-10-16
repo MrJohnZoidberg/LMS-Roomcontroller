@@ -93,17 +93,13 @@ class Bluetooth:
             if addr not in self.connected_devices:
                 name = [d['name'] for d in self.ctl.get_available_devices() if d['mac_address'] == addr][0]
                 self.connected_devices[addr] = name
-            print(1)
             self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
                                                                      args=(addr,))
             self.threadobjs_wait_disconnect[addr].start()
-            print(2)
-            self.send_device_lists()
-            print(3)
             sc.start(sc.get_soundcard(self.connected_devices[addr]))
-            print(4)
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceConnect', payload=json.dumps(payload))
+        self.send_device_lists()
 
     def thread_disconnect(self, addr):
         result = self.ctl.disconnect(addr)
