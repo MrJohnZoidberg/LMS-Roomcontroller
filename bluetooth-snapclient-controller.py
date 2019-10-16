@@ -27,7 +27,7 @@ class SnapclientControll:
 
     @staticmethod
     def is_active(soundcard):
-        expect_list = ["active (running)", "inactive (dead)"]
+        expect_list = [r"active \(running\)", r"inactive \(dead\)"]
         result = pexpect.spawnu(f"systemctl status snapclient@{soundcard}").expect(expect_list) == 0
         return result
 
