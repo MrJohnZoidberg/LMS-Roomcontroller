@@ -112,14 +112,6 @@ class Bluetoothctl:
         else:
             return out
 
-    def get_device_name(self, mac_address):
-        """Get device info by mac address."""
-        device_info = self.get_device_info(mac_address)
-        print(device_info)
-        for line in device_info:
-            print(line)
-        return "Kombo_22"
-
     def pair(self, mac_address):
         """Try to pair with a device by mac address."""
         try:
@@ -172,26 +164,12 @@ class Bluetoothctl:
 
     def connect(self, mac_address):
         """Try to connect to a device by mac address."""
-        try:
-            self.send(f"connect {mac_address}\n", 3)
-        except Exception as e:
-            logger.error(e)
-            return False
-        else:
-            res = self.process.expect(
-                ["Failed to connect", "Connection successful", pexpect.EOF, pexpect.TIMEOUT]
-            )
-            return res == 1
+        self.process.send(f"connect {mac_address}\n")
+        res = self.process.expect(["Failed to connect", "Connection successful", pexpect.TIMEOUT, pexpect.EOF], 5)
+        return res
 
     def disconnect(self, mac_address):
         """Try to disconnect to a device by mac address."""
-        try:
-            self.send(f"disconnect {mac_address}\n", 2)
-        except Exception as e:
-            logger.error(e)
-            return False
-        else:
-            res = self.process.expect(
-                ["Failed to disconnect", "Successful disconnected", pexpect.EOF, pexpect.TIMEOUT]
-            )
-            return res == 1
+        self.process.send(f"disconnect {mac_address}\n")
+        res = self.process.expect(["Failed to disconnect", "Successful disconnected", pexpect.TIMEOUT, pexpect.EOF], 5)
+        return res
