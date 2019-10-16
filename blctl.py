@@ -35,10 +35,11 @@ class Bluetoothctl:
             logger.error(e)
             return False
         else:
+            # TODO: This gives an error messsage if repeated
             res = self.process.expect(
-                ["Discovering: yes", pexpect.EOF, pexpect.TIMEOUT], 3
+                ["Failed to start discovery", "Discovery started", pexpect.EOF, pexpect.TIMEOUT], 3
             )
-            return res == 0
+            return res == 1
 
     def make_discoverable(self):
         """Make device discoverable."""
