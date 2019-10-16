@@ -5,3 +5,4 @@ mqtt = "localhost:1883"
 
 [device]
 site_id = "default"
+soundcards = "Kombo_22:bluetooth_speaker,MDR-1000X:bluetooth_headphones"

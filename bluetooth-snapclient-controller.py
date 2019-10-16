@@ -12,9 +12,17 @@ MQTT_USERNAME = None
 MQTT_PASSWORD = None
 
 
-class Snapclient:
+class SnapclientControll:
     def __init__(self):
         pass
+
+    @staticmethod
+    def get_soundcard(device_name):
+        soundcard_dict = {pair.split(":")[0]: pair.split(":")[1] for pair in config['device']['soundcards'].split(",")}
+        if device_name in soundcard_dict:
+            return soundcard_dict[device_name]
+        else:
+            return None
 
 
 class Bluetooth:
@@ -24,14 +32,22 @@ class Bluetooth:
         self.threadobj_disconnect = None
         self.threadobj_remove = None
         self.threadobjs_wait_disconnect = dict()
+        self.connected_addresses = list()
         self.ctl = blctl.Bluetoothctl()
+
+    def get_name_from_addr(self, addr):
+        addr_dict = {device['mac_address']: device['name'] for device in self.ctl.get_available_devices()}
+        return addr_dict[addr]
 
     def thread_wait_until_disconnect(self, addr):
         self.ctl.wait_for_disconnect(addr)
-        # Stop Snapclient service
-        self.send_device_lists()
-        payload = {'siteId': site_id, 'result': True, 'addr': addr}
-        mqtt_client.publish(f'bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
+        if addr in self.connected_addresses:
+            self.connected_addresses = [addr for addr in self.connected_addresses if not addr]
+            # TODO: Stop Snapclient service
+            print("Stop Snapclient@{}".format(sc.get_soundcard(self.get_name_from_addr(addr))))
+            self.send_device_lists()
+            payload = {'siteId': site_id, 'result': True, 'addr': addr}
+            mqtt_client.publish(f'bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
 
     def thread_discover(self):
         result = self.ctl.start_discover()
@@ -49,15 +65,20 @@ class Bluetooth:
     def thread_connect(self, addr):
         result = self.ctl.connect(addr)
         if result:
+            if addr not in self.connected_addresses:
+                self.connected_addresses.append(addr)
+            self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
+                                                                     args=(addr,))
+            self.threadobjs_wait_disconnect[addr].start()
             self.send_device_lists()
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceConnect', payload=json.dumps(payload))
-        self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect, args=(addr,))
-        self.threadobjs_wait_disconnect[addr].start()
 
     def thread_disconnect(self, addr):
         result = self.ctl.disconnect(addr)
         if result:
+            if addr in self.connected_addresses:
+                self.connected_addresses = [addr for addr in self.connected_addresses if not addr]
             self.send_device_lists()
             if self.threadobjs_wait_disconnect[addr]:
                 del self.threadobjs_wait_disconnect[addr]
@@ -129,6 +150,7 @@ if __name__ == "__main__":
     site_id = config['device']['site_id']
 
     bl = Bluetooth()
+    sc = SnapclientControll()
 
     mqtt_client = mqtt.Client()
     mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
