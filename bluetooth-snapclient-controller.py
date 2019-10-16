@@ -34,14 +34,20 @@ class SnapclientControll:
     @staticmethod
     def start(soundcard):
         expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
-        result = pexpect.spawnu(f"systemctl start snapclient@{soundcard}").expect(expect_list, 5) == 0
-        return result
+        result = pexpect.spawnu(f"systemctl restart snapclient@{soundcard}").expect(expect_list, 5) == 0
+        if result:
+            print(f"Successfully started Snapclient with soundcard <{soundcard}>.")
+        else:
+            print(f"Failed to start Snapclient with soundcard <{soundcard}>.")
 
     @staticmethod
     def stop(soundcard):
         expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
         result = pexpect.spawnu(f"systemctl stop snapclient@{soundcard}").expect(expect_list, 6) == 0
-        return result
+        if result:
+            print(f"Successfully stopped Snapclient with soundcard <{soundcard}>.")
+        else:
+            print(f"Failed to stop Snapclient with soundcard <{soundcard}>.")
 
 
 class Bluetooth:
@@ -64,14 +70,8 @@ class Bluetooth:
         self.ctl.wait_for_disconnect(addr)
         if addr in self.connected_addresses:
             self.connected_addresses = [addr for addr in self.connected_addresses if not addr]
-            # TODO: Stop Snapclient service
-            print("Is active", sc.is_active(sc.get_soundcard(self.get_name_from_addr(addr))))
-            print("Start", sc.start(sc.get_soundcard(self.get_name_from_addr(addr))))
-            time.sleep(5)
-            print("Is active", sc.is_active(sc.get_soundcard(self.get_name_from_addr(addr))))
-            print("Stop", sc.stop(sc.get_soundcard(self.get_name_from_addr(addr))))
-            print("Is active", sc.is_active(sc.get_soundcard(self.get_name_from_addr(addr))))
             self.send_device_lists()
+            sc.stop(sc.get_soundcard(self.get_name_from_addr(addr)))
             payload = {'siteId': site_id, 'result': True, 'addr': addr}
             mqtt_client.publish(f'bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
 
@@ -97,6 +97,7 @@ class Bluetooth:
                                                                      args=(addr,))
             self.threadobjs_wait_disconnect[addr].start()
             self.send_device_lists()
+            sc.start(sc.get_soundcard(self.get_name_from_addr(addr)))
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceConnect', payload=json.dumps(payload))
 
@@ -108,6 +109,7 @@ class Bluetooth:
             self.send_device_lists()
             if self.threadobjs_wait_disconnect[addr]:
                 del self.threadobjs_wait_disconnect[addr]
+            sc.stop(sc.get_soundcard(self.get_name_from_addr(addr)))
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
 
