@@ -6,12 +6,13 @@ if [ ! -e config.toml ]; then
 else
     user_line=$(sed '3q;d' config.toml)
     user_version=${user_line//[!0-9]/}
-    echo "$user_version"
     setup_line=$(sed '3q;d' config.toml.setup)
     setup_version=${setup_line//[!0-9]/}
-    echo "$setup_version"
     if [ "$user_version" -lt "$setup_version" ]; then
-        echo "hello"
+        cp config.toml config.toml.old
+        cp config.toml.setup config.toml
+        echo "The config.toml file has been updated and all values are reset to default."
+        echo "For your previous values, look in config.toml.old"
     fi
 fi
 
