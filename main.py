@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-import paho.mqtt.client as mqtt
 import toml
+import paho.mqtt.client as mqtt
 import bluetoothctl
 import snapclientctl
 
