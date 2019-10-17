@@ -135,7 +135,7 @@ class Bluetooth:
         self.bl_helper = BluetoothHelper()
         self.mqtt_client = mqtt_client
         self.site_id = config['device']['site_id']
-        self.soundcards = config['device']['soundcards']
+        self.soundcards = config['soundcards']
 
     def thread_wait_until_disconnect(self, addr):
         self.bl_helper.wait_for_disconnect(addr)
