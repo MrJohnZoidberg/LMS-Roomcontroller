@@ -188,7 +188,7 @@ class Bluetooth:
                     payload = {'soundcard': self.soundcards[self.connected_devices[addr]]}
                     self.mqtt_client.publish(f'snapclient/{self.site_id}/stopService', payload=json.dumps(payload))
                 del self.connected_devices[addr]
-            if addr in self.threadobjs_wait_disconnect and self.threadobjs_wait_disconnect[addr]:
+            if addr in self.threadobjs_wait_disconnect:
                 del self.threadobjs_wait_disconnect[addr]
         payload = {'siteId': self.site_id, 'result': result, 'addr': addr}
         self.mqtt_client.publish('bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
