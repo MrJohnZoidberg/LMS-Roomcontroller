@@ -33,7 +33,6 @@ if __name__ == "__main__":
         MQTT_USERNAME = config['snips-common']['mqtt_username']
     if 'mqtt_password' in config['snips-common']:
         MQTT_PASSWORD = config['snips-common']['mqtt_password']
-    print(config)
     site_id = config['device']['site_id']
 
     mqtt_client = mqtt.Client()
@@ -41,7 +40,7 @@ if __name__ == "__main__":
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER_ADDRESS.split(":")[0], int(MQTT_BROKER_ADDRESS.split(":")[1]))
 
-    bl = bluetoothctl.Bluetooth(mqtt_client, site_id)
+    bl = bluetoothctl.Bluetooth(mqtt_client, config)
     bl.send_device_lists()
     sc = snapclientctl.SnapclientControll()
 
