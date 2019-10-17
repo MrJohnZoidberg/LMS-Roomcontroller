@@ -112,6 +112,7 @@ class Bluetooth:
                 del self.threadobjs_wait_disconnect[addr]
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
+        self.send_device_lists()
 
     def thread_trust(self, addr):
         result = self.ctl.trust(addr)
