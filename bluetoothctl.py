@@ -169,12 +169,13 @@ class Bluetooth:
             if addr not in self.connected_devices:
                 name = [d['name'] for d in self.bl_helper.get_available_devices() if d['mac_address'] == addr][0]
                 self.connected_devices[addr] = name
-            self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
-                                                                     args=(addr,))
-            self.threadobjs_wait_disconnect[addr].start()
-            if self.connected_devices[addr] in self.soundcards:
-                payload = {'soundcard': self.soundcards[self.connected_devices[addr]]}
-                self.mqtt_client.publish(f'snapclient/{self.site_id}/startService', payload=json.dumps(payload))
+                if addr not in self.threadobjs_wait_disconnect:
+                    self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
+                                                                             args=(addr,))
+                    self.threadobjs_wait_disconnect[addr].start()
+                if self.connected_devices[addr] in self.soundcards:
+                    payload = {'soundcard': self.soundcards[self.connected_devices[addr]]}
+                    self.mqtt_client.publish(f'snapclient/{self.site_id}/startService', payload=json.dumps(payload))
         payload = {'siteId': self.site_id, 'result': result, 'addr': addr}
         self.mqtt_client.publish('bluetooth/result/deviceConnect', payload=json.dumps(payload))
         self.send_device_lists()
