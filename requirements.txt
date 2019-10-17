@@ -1,3 +1,5 @@
 toml
 paho-mqtt
 pexpect
+requests
+json-rpc
