@@ -123,14 +123,8 @@ class BluetoothHelper:
 
 class Bluetooth:
     def __init__(self, mqtt_client, config):
-        self.threadobj_discover = None
-        self.threadobj_connect = None
-        self.threadobj_disconnect = None
-        self.threadobj_trust = None
-        self.threadobj_untrust = None
-        self.threadobj_remove = None
+        self.threadobjs = dict()
         self.threadobjs_wait_disconnect = dict()
-        self.connected_addresses = list()
         self.connected_devices = dict()
         self.bl_helper = BluetoothHelper()
         self.mqtt_client = mqtt_client
@@ -144,7 +138,6 @@ class Bluetooth:
             if self.connected_devices[addr] in self.soundcards:
                 payload = {'soundcard': self.soundcards[self.connected_devices[addr]]}
                 self.mqtt_client.publish(f'snapclient/{self.site_id}/stopService', payload=json.dumps(payload))
-                # sc.stop(self.soundcards[self.connected_devices[addr]])
             del self.connected_devices[addr]
             self.send_device_lists()
             payload = {'siteId': self.site_id, 'result': True, 'addr': addr}
@@ -212,52 +205,52 @@ class Bluetooth:
                     payload = {'soundcard': self.soundcards[self.connected_devices[addr]]}
                     self.mqtt_client.publish(f'snapclient/{self.site_id}/stopService', payload=json.dumps(payload))
                 del self.connected_devices[addr]
-            if addr in self.threadobjs_wait_disconnect and self.threadobjs_wait_disconnect[addr]:
+            if addr in self.threadobjs_wait_disconnect:
                 del self.threadobjs_wait_disconnect[addr]
         payload = {'siteId': self.site_id, 'result': result, 'addr': addr}
         self.mqtt_client.publish('bluetooth/result/deviceRemove', payload=json.dumps(payload))
         self.send_device_lists()
 
     def discover(self, client, userdata, msg):
-        if self.threadobj_discover:
-            del self.threadobj_discover
-        self.threadobj_discover = threading.Thread(target=self.thread_discover)
-        self.threadobj_discover.start()
+        if 'discover' in self.threadobjs:
+            del self.threadobjs['discover']
+        self.threadobjs['discover'] = threading.Thread(target=self.thread_discover)
+        self.threadobjs['discover'].start()
 
     def connect(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        if self.threadobj_connect:
-            del self.threadobj_connect
-        self.threadobj_connect = threading.Thread(target=self.thread_connect, args=(data['addr'],))
-        self.threadobj_connect.start()
+        if 'connect' in self.threadobjs:
+            del self.threadobjs['connect']
+        self.threadobjs['connect'] = threading.Thread(target=self.thread_connect, args=(data['addr'],))
+        self.threadobjs['connect'].start()
 
     def disconnect(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        if self.threadobj_disconnect:
-            del self.threadobj_disconnect
-        self.threadobj_disconnect = threading.Thread(target=self.thread_disconnect, args=(data['addr'],))
-        self.threadobj_disconnect.start()
+        if 'disconnect' in self.threadobjs:
+            del self.threadobjs['disconnect']
+        self.threadobjs['disconnect'] = threading.Thread(target=self.thread_disconnect, args=(data['addr'],))
+        self.threadobjs['disconnect'].start()
 
     def trust(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        if self.threadobj_trust:
-            del self.threadobj_trust
-        self.threadobj_trust = threading.Thread(target=self.thread_trust, args=(data['addr'],))
-        self.threadobj_trust.start()
+        if 'trust' in self.threadobjs:
+            del self.threadobjs['trust']
+        self.threadobjs['trust'] = threading.Thread(target=self.thread_trust, args=(data['addr'],))
+        self.threadobjs['trust'].start()
 
     def untrust(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        if self.threadobj_untrust:
-            del self.threadobj_untrust
-        self.threadobj_untrust = threading.Thread(target=self.thread_untrust, args=(data['addr'],))
-        self.threadobj_untrust.start()
+        if 'untrust' in self.threadobjs:
+            del self.threadobjs['untrust']
+        self.threadobjs['untrust'] = threading.Thread(target=self.thread_untrust, args=(data['addr'],))
+        self.threadobjs['untrust'].start()
 
     def remove(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        if self.threadobj_remove:
-            del self.threadobj_remove
-        self.threadobj_remove = threading.Thread(target=self.thread_remove, args=(data['addr'],))
-        self.threadobj_remove.start()
+        if 'remove' in self.threadobjs:
+            del self.threadobjs['remove']
+        self.threadobjs['remove'] = threading.Thread(target=self.thread_remove, args=(data['addr'],))
+        self.threadobjs['remove'].start()
 
     def send_device_lists(self, client=None, userdata=None, msg=None):
         payload = {'available_devices': self.bl_helper.get_available_devices(),
