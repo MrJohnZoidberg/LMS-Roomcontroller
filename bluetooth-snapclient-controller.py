@@ -33,6 +33,7 @@ if __name__ == "__main__":
         MQTT_USERNAME = config['snips-common']['mqtt_username']
     if 'mqtt_password' in config['snips-common']:
         MQTT_PASSWORD = config['snips-common']['mqtt_password']
+    print(config)
     site_id = config['device']['site_id']
 
     mqtt_client = mqtt.Client()
