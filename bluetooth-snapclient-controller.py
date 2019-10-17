@@ -19,9 +19,8 @@ class SnapclientControll:
 
     @staticmethod
     def get_soundcard(device_name):
-        soundcard_dict = {pair.split(":")[0]: pair.split(":")[1] for pair in config['device']['soundcards'].split(",")}
-        if device_name in soundcard_dict:
-            return soundcard_dict[device_name]
+        if device_name in config['device']['soundcards']:
+            return config['device']['soundcards'][device_name]
         else:
             return None
 
@@ -95,7 +94,9 @@ class Bluetooth:
             self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
                                                                      args=(addr,))
             self.threadobjs_wait_disconnect[addr].start()
-            sc.start(sc.get_soundcard(self.connected_devices[addr]))
+            soundcard = sc.get_soundcard(self.connected_devices[addr])
+            if soundcard:
+                sc.start(soundcard)
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceConnect', payload=json.dumps(payload))
         self.send_device_lists()
@@ -104,7 +105,9 @@ class Bluetooth:
         result = self.ctl.disconnect(addr)
         if result:
             if addr in self.connected_devices:
-                sc.stop(sc.get_soundcard(self.connected_devices[addr]))
+                soundcard = sc.get_soundcard(self.connected_devices[addr])
+                if soundcard:
+                    sc.stop(soundcard)
                 del self.connected_devices[addr]
             if addr in self.threadobjs_wait_disconnect and self.threadobjs_wait_disconnect[addr]:
                 del self.threadobjs_wait_disconnect[addr]
@@ -125,9 +128,16 @@ class Bluetooth:
     def thread_remove(self, addr):
         result = self.ctl.remove(addr)
         if result:
-            self.send_device_lists()
+            if addr in self.connected_devices:
+                soundcard = sc.get_soundcard(self.connected_devices[addr])
+                if soundcard:
+                    sc.stop(soundcard)
+                del self.connected_devices[addr]
+            if addr in self.threadobjs_wait_disconnect and self.threadobjs_wait_disconnect[addr]:
+                del self.threadobjs_wait_disconnect[addr]
         payload = {'siteId': site_id, 'result': result, 'addr': addr}
         mqtt_client.publish(f'bluetooth/result/deviceRemove', payload=json.dumps(payload))
+        self.send_device_lists()
 
     def discover(self, client, userdata, msg):
         if self.threadobj_discover:

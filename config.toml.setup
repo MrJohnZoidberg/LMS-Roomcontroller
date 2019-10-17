@@ -9,4 +9,8 @@ mqtt = "localhost:1883"  # "host:port"
 
 [device]
 site_id = "default"  # "Site-ID"
-soundcards = "Kombo_22:bluetooth_speaker"  # "bluetooth_device_name:soundcard_name"
+
+[soundcards]
+# The bluetooth soundcard for a bluetooth device
+# "<bluetooth_device_name>" = "<soundcard_name>"
+"Kombo_22" = "bluetooth_speaker"
