@@ -1,16 +1,10 @@
 import pexpect
+import json
 
 
 class SnapclientControll:
     def __init__(self):
         pass
-
-    @staticmethod
-    def get_soundcard(device_name):
-        if device_name in config['device']['soundcards']:
-            return config['device']['soundcards'][device_name]
-        else:
-            return None
 
     @staticmethod
     def is_active(soundcard):
@@ -19,7 +13,9 @@ class SnapclientControll:
         return result
 
     @staticmethod
-    def start(soundcard):
+    def start(client, userdata, msg):
+        data = json.loads(msg.payload.decode("utf-8"))
+        soundcard = data['soundcard']
         expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
         result = pexpect.spawnu(f"systemctl restart -f snapclient@{soundcard}").expect(expect_list, 4) == 0
         if result:
@@ -28,7 +24,9 @@ class SnapclientControll:
             print(f"Failed to start Snapclient with soundcard <{soundcard}>.")
 
     @staticmethod
-    def stop(soundcard):
+    def stop(client, userdata, msg):
+        data = json.loads(msg.payload.decode("utf-8"))
+        soundcard = data['soundcard']
         expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
         result = pexpect.spawnu(f"systemctl stop -f snapclient@{soundcard}").expect(expect_list, 4) == 0
         if result:
