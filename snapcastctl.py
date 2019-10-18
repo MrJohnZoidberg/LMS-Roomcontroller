@@ -79,5 +79,28 @@ class SnapserverControll:
 
 
 class SnapcastControll:
-    def __init__(self):
-        pass
+    def __init__(self, mqtt_client, bltctl, mpdctl, config):
+        self.mqtt_client = mqtt_client
+        self.site_id = config['device']['site_id']
+        self.room_name = config['device']['room_name']
+        self.bltctl = bltctl
+        self.mpdctl = mpdctl
+        self.config = config
+
+    def send_site_info(self, client=None, userdata=None, msg=None):
+        payload = {'room_name': self.room_name, 'site_id': self.site_id}
+        self.mqtt_client.publish('bluetooth/answer/siteInfo', payload=json.dumps(payload))
+
+    def send_device_names(self, client, userdata, msg):
+        available_bluetooth_devices = [d['name'] for d in self.bltctl.bl_helper.get_available_devices()]
+        configured_bluetooth_devices = [d if d not in self.config['bluetooth']['synonyms']
+                                        else self.config['bluetooth']['synonyms'][d]
+                                        for d in self.config['bluetooth']['soundcards']]
+        configured_nonbluetooth_devices = [d for d in self.config['snapcast']['nbsoundcards']]
+        all_names = available_bluetooth_devices + configured_bluetooth_devices + configured_nonbluetooth_devices
+        filtered_names = list()
+        for name in all_names:
+            if name not in filtered_names:
+                filtered_names.append(name)
+        payload = {'names': filtered_names, 'site_id': self.site_id}
+        self.mqtt_client.publish('snapcast/answer/siteDevices', payload=json.dumps(payload))

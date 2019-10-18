@@ -2,20 +2,35 @@
 # You can adjust all values after the "=" according to your wishes.
 version = 1  # Do not delete this line, it's for Git update and setup.sh
 
-[snips-common]
-mqtt = "localhost:1883"
-# mqtt_username = ""
-# mqtt_password = ""
+[snips]
 
-[device]
-site_id = "default"  # "Site-ID"
-room_name = "Wohnzimmer"  # TODO: Use this
+    [snips.common]
+    mqtt = "localhost:1883"
+    # mqtt_username = ""
+    # mqtt_password = ""
 
-[snapclient]
-default_soundcard = "bluetooth_speaker"  # if Room slot is "here" # TODO: Use this
+    [snips.device]
+    site_id = "default"
+    room_name = "Wohnzimmer"
 
-[snapclient-soundcards]
-# The bluetooth soundcard for a bluetooth device
-# "<bluetooth_device_name>" = "<soundcard_name>"
-"Kombo_22" = "bluetooth_speaker"
-"Analog" = "alsa_soundcard"
+[bluetooth]
+
+    [bluetooth.soundcards]
+    # The bluetooth soundcard for a bluetooth device
+    # "<bluetooth_device_name>" = "<soundcard_name>"
+    "Kombo_22" = "bluetooth_speaker"
+    "MDR-1000X" = "bluetooth_headphone"
+
+    [bluetooth.synonyms]
+    # A pronounceable synonym of a bluetooth device from bluetooth.soundcards
+    "Kombo_22" = "Verstärker"
+    "MDR-1000X" = "Kopfhörer"
+
+[snapcast]
+
+    [snapcast.common]
+    default_soundcard = "bluetooth_speaker"  # if Room slot is "here" # TODO: Use this
+
+    [snapcast.nbsoundcards]
+    # The non-bluetooth ALSA soundcards
+    # "<pronounceable_name>" = "<soundcard_name>"
