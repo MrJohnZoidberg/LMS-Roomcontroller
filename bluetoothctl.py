@@ -224,7 +224,7 @@ class Bluetooth:
                    'site_id': self.site_id}
         self.mqtt_client.publish('bluetooth/answer/deviceLists', payload=json.dumps(payload))
 
-    def send_site_info(self, client, userdata, msg):
+    def send_site_info(self, client=None, userdata=None, msg=None):
         payload = {'room_name': self.room_name,
                    'site_id': self.site_id}
         self.mqtt_client.publish('bluetooth/answer/siteInfo', payload=json.dumps(payload))

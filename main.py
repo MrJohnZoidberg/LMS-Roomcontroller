@@ -43,6 +43,7 @@ if __name__ == "__main__":
     mqtt_client.connect(MQTT_BROKER_ADDRESS.split(":")[0], int(MQTT_BROKER_ADDRESS.split(":")[1]))
 
     bl = bluetoothctl.Bluetooth(mqtt_client, config)
+    bl.send_site_info()
     bl.send_device_lists()
     snapclientctl = snapclientctl.SnapclientControll()
 
