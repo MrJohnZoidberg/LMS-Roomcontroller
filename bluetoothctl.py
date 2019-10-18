@@ -130,6 +130,7 @@ class Bluetooth:
         self.mqtt_client = mqtt_client
         self.site_id = config['snips']['device']['site_id']
         self.room_name = config['snips']['device']['room_name']
+        self.synonyms = config['bluetooth']['synonyms']
 
     def thread_wait_until_disconnect(self, addr):
         self.bl_helper.wait_for_disconnect(addr)
@@ -225,5 +226,5 @@ class Bluetooth:
         self.mqtt_client.publish('bluetooth/answer/deviceLists', payload=json.dumps(payload))
 
     def send_site_info(self, client=None, userdata=None, msg=None):
-        payload = {'room_name': self.room_name, 'site_id': self.site_id}
+        payload = {'room_name': self.room_name, 'site_id': self.site_id, 'synonyms': self.synonyms}
         self.mqtt_client.publish('bluetooth/answer/siteInfo', payload=json.dumps(payload))
