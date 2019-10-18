@@ -5,7 +5,7 @@ import json
 import paho.mqtt.client as mqtt
 import bluetoothctl
 import snapcastctl
-import mpdctl
+import musicpdctl
 
 MQTT_BROKER_ADDRESS = "localhost:1883"
 MQTT_USERNAME = None
@@ -28,10 +28,6 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(f'bluetooth/request/oneSite/{site_id}/#')
     client.subscribe('bluetooth/request/allSites/#')
 
-    client.message_callback_add(f'snapclient/{site_id}/startService', sncctl.start)
-    client.message_callback_add(f'snapclient/{site_id}/stopService', sncctl.stop)
-    client.subscribe(f'snapclient/{site_id}/#')
-
 
 if __name__ == "__main__":
     config = toml.load('config.toml')
@@ -45,14 +41,15 @@ if __name__ == "__main__":
     room_name = config['device']['room_name']
 
     mqtt_client = mqtt.Client()
+
+    bltctl = bluetoothctl.Bluetooth(mqtt_client, config)
+    sncctl = snapcastctl.SnapcastControll()
+    mpdctl = musicpdctl.MPDControll()
+
     mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER_ADDRESS.split(":")[0], int(MQTT_BROKER_ADDRESS.split(":")[1]))
 
-    bltctl = bluetoothctl.Bluetooth(mqtt_client, config)
-    bltctl.send_device_lists()
-    sncctl = snapcastctl.SnapcastControll()
-    mpdctl = mpdctl.MPDControll()
-
     send_site_info()
+    bltctl.send_device_lists()
     mqtt_client.loop_forever()

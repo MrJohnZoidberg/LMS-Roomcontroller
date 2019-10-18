@@ -221,5 +221,5 @@ class Bluetooth:
                    'paired_devices': self.bl_helper.get_paired_devices(),
                    'connected_devices': [{'mac_address': addr, 'name': self.connected_devices[addr]}
                                          for addr in self.connected_devices],
-                   'site_id': self.site_id}
+                   'siteId': self.site_id}
         self.mqtt_client.publish('bluetooth/answer/deviceLists', payload=json.dumps(payload))
