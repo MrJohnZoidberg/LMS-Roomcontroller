@@ -11,18 +11,18 @@ MQTT_PASSWORD = None
 
 
 def on_connect(client, userdata, flags, rc):
-    client.message_callback_add(f'bluetooth/ask/{site_id}/devicesDiscover', bl.discover)
-    client.message_callback_add(f'bluetooth/ask/{site_id}/deviceConnect', bl.connect)
-    client.message_callback_add(f'bluetooth/ask/{site_id}/deviceDisconnect', bl.disconnect)
-    client.message_callback_add(f'bluetooth/ask/{site_id}/deviceTrust', bl.trust)
-    client.message_callback_add(f'bluetooth/ask/{site_id}/deviceUntrust', bl.untrust)
-    client.message_callback_add(f'bluetooth/ask/{site_id}/deviceRemove', bl.remove)
-    client.message_callback_add(f'snapclient/{site_id}/startService', sc.start)
-    client.message_callback_add(f'snapclient/{site_id}/stopService', sc.stop)
-    client.message_callback_add('bluetooth/update/requestDeviceLists', bl.send_device_lists)
-    client.subscribe(f'bluetooth/ask/{site_id}/#')
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/devicesDiscover', bl.discover)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceConnect', bl.connect)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceDisconnect', bl.disconnect)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceRemove', bl.remove)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceLists', bl.send_device_lists)
+    client.message_callback_add('bluetooth/request/allSites/deviceLists', bl.send_device_lists)
+    client.subscribe(f'bluetooth/request/oneSite/{site_id}/#')
+    client.subscribe('bluetooth/request/allSites/#')
+
+    client.message_callback_add(f'snapclient/{site_id}/startService', snapclientctl.start)
+    client.message_callback_add(f'snapclient/{site_id}/stopService', snapclientctl.stop)
     client.subscribe(f'snapclient/{site_id}/#')
-    client.subscribe('bluetooth/update/requestDeviceLists')
 
 
 if __name__ == "__main__":
@@ -42,6 +42,6 @@ if __name__ == "__main__":
 
     bl = bluetoothctl.Bluetooth(mqtt_client, config)
     bl.send_device_lists()
-    sc = snapclientctl.SnapclientControll()
+    snapclientctl = snapclientctl.SnapclientControll()
 
     mqtt_client.loop_forever()

@@ -3,14 +3,19 @@
 version = 1  # Do not delete this line, it's for Git update and setup.sh
 
 [snips-common]
-mqtt = "localhost:1883"  # "host:port"
-# mqtt_username = ""  # "username"
-# mqtt_password = ""  # "password"
+mqtt = "localhost:1883"
+# mqtt_username = ""
+# mqtt_password = ""
 
 [device]
 site_id = "default"  # "Site-ID"
+room_name = "Wohnzimmer"  # TODO: Use this
 
-[soundcards]
+[snapclient]
+default_soundcard = "bluetooth_speaker"  # if Room slot is "here" # TODO: Use this
+
+[snapclient-soundcards]
 # The bluetooth soundcard for a bluetooth device
 # "<bluetooth_device_name>" = "<soundcard_name>"
 "Kombo_22" = "bluetooth_speaker"
+"Analog" = "alsa_soundcard"

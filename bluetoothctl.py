@@ -129,24 +129,20 @@ class Bluetooth:
         self.bl_helper = BluetoothHelper()
         self.mqtt_client = mqtt_client
         self.site_id = config['device']['site_id']
-        self.soundcards = config['soundcards']
 
     def thread_wait_until_disconnect(self, addr):
         self.bl_helper.wait_for_disconnect(addr)
         time.sleep(2)
         if addr in self.connected_devices:
-            if self.connected_devices[addr] in self.soundcards:
-                payload = {'soundcard': self.soundcards[self.connected_devices[addr]]}
-                self.mqtt_client.publish(f'snapclient/{self.site_id}/stopService', payload=json.dumps(payload))
             del self.connected_devices[addr]
             self.send_device_lists()
             payload = {'siteId': self.site_id, 'result': True, 'addr': addr}
-            self.mqtt_client.publish('bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
+            self.mqtt_client.publish('bluetooth/answer/deviceDisconnect', payload=json.dumps(payload))
 
     def thread_discover(self):
         result = self.bl_helper.start_discover()
         payload = {'siteId': self.site_id, 'result': result}
-        self.mqtt_client.publish('bluetooth/result/devicesDiscover', payload=json.dumps(payload))
+        self.mqtt_client.publish('bluetooth/answer/devicesDiscover', payload=json.dumps(payload))
         if not result:
             return
         for i in range(30):
@@ -154,7 +150,7 @@ class Bluetooth:
         self.send_device_lists()
         payload = {'discoverable_devices': self.bl_helper.get_discoverable_devices(),
                    'siteId': self.site_id}
-        self.mqtt_client.publish('bluetooth/result/devicesDiscovered', payload=json.dumps(payload))
+        self.mqtt_client.publish('bluetooth/answer/devicesDiscovered', payload=json.dumps(payload))
 
     def thread_connect(self, addr):
         result = self.bl_helper.connect(addr)
@@ -166,49 +162,30 @@ class Bluetooth:
                     self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
                                                                              args=(addr,))
                     self.threadobjs_wait_disconnect[addr].start()
-                if self.connected_devices[addr] in self.soundcards:
-                    payload = {'soundcard': self.soundcards[self.connected_devices[addr]], 'addr': addr}
-                    self.mqtt_client.publish(f'snapclient/{self.site_id}/startService', payload=json.dumps(payload))
         payload = {'siteId': self.site_id, 'result': result, 'addr': addr}
-        self.mqtt_client.publish('bluetooth/result/deviceConnect', payload=json.dumps(payload))
+        self.mqtt_client.publish('bluetooth/answer/deviceConnect', payload=json.dumps(payload))
         self.send_device_lists()
 
     def thread_disconnect(self, addr):
         result = self.bl_helper.disconnect(addr)
         if result:
             if addr in self.connected_devices:
-                if self.connected_devices[addr] in self.soundcards:
-                    payload = {'soundcard': self.soundcards[self.connected_devices[addr]]}
-                    self.mqtt_client.publish(f'snapclient/{self.site_id}/stopService', payload=json.dumps(payload))
                 del self.connected_devices[addr]
             if addr in self.threadobjs_wait_disconnect:
                 del self.threadobjs_wait_disconnect[addr]
         payload = {'siteId': self.site_id, 'result': result, 'addr': addr}
-        self.mqtt_client.publish('bluetooth/result/deviceDisconnect', payload=json.dumps(payload))
+        self.mqtt_client.publish('bluetooth/answer/deviceDisconnect', payload=json.dumps(payload))
         self.send_device_lists()
-
-    def thread_trust(self, addr):
-        result = self.bl_helper.trust(addr)
-        payload = {'siteId': self.site_id, 'result': result, 'addr': addr}
-        self.mqtt_client.publish('bluetooth/result/deviceTrust', payload=json.dumps(payload))
-
-    def thread_untrust(self, addr):
-        result = self.bl_helper.untrust(addr)
-        payload = {'siteId': self.site_id, 'result': result, 'addr': addr}
-        self.mqtt_client.publish('bluetooth/result/deviceUntrust', payload=json.dumps(payload))
 
     def thread_remove(self, addr):
         result = self.bl_helper.remove(addr)
         if result:
             if addr in self.connected_devices:
-                if self.connected_devices[addr] in self.soundcards:
-                    payload = {'soundcard': self.soundcards[self.connected_devices[addr]]}
-                    self.mqtt_client.publish(f'snapclient/{self.site_id}/stopService', payload=json.dumps(payload))
                 del self.connected_devices[addr]
             if addr in self.threadobjs_wait_disconnect:
                 del self.threadobjs_wait_disconnect[addr]
         payload = {'siteId': self.site_id, 'result': result, 'addr': addr}
-        self.mqtt_client.publish('bluetooth/result/deviceRemove', payload=json.dumps(payload))
+        self.mqtt_client.publish('bluetooth/answer/deviceRemove', payload=json.dumps(payload))
         self.send_device_lists()
 
     def discover(self, client, userdata, msg):
@@ -231,20 +208,6 @@ class Bluetooth:
         self.threadobjs['disconnect'] = threading.Thread(target=self.thread_disconnect, args=(data['addr'],))
         self.threadobjs['disconnect'].start()
 
-    def trust(self, client, userdata, msg):
-        data = json.loads(msg.payload.decode("utf-8"))
-        if 'trust' in self.threadobjs:
-            del self.threadobjs['trust']
-        self.threadobjs['trust'] = threading.Thread(target=self.thread_trust, args=(data['addr'],))
-        self.threadobjs['trust'].start()
-
-    def untrust(self, client, userdata, msg):
-        data = json.loads(msg.payload.decode("utf-8"))
-        if 'untrust' in self.threadobjs:
-            del self.threadobjs['untrust']
-        self.threadobjs['untrust'] = threading.Thread(target=self.thread_untrust, args=(data['addr'],))
-        self.threadobjs['untrust'].start()
-
     def remove(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
         if 'remove' in self.threadobjs:
@@ -255,5 +218,7 @@ class Bluetooth:
     def send_device_lists(self, client=None, userdata=None, msg=None):
         payload = {'available_devices': self.bl_helper.get_available_devices(),
                    'paired_devices': self.bl_helper.get_paired_devices(),
-                   'siteId': self.site_id}
-        self.mqtt_client.publish('bluetooth/update/deviceLists', payload=json.dumps(payload))
+                   'connected_devices': [{'mac_address': addr, 'name': self.connected_devices[addr]}
+                                         for addr in self.connected_devices],
+                   'site_id': self.site_id}
+        self.mqtt_client.publish('bluetooth/answer/deviceLists', payload=json.dumps(payload))
