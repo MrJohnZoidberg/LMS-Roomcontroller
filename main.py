@@ -13,7 +13,7 @@ MQTT_PASSWORD = None
 
 
 def send_site_info(client=None, userdata=None, msg=None):
-    client.publish('bluetooth/answer/siteInfo', payload=json.dumps({'room_name': room_name, 'site_id': site_id}))
+    mqtt_client.publish('bluetooth/answer/siteInfo', payload=json.dumps({'room_name': room_name, 'site_id': site_id}))
 
 
 def on_connect(client, userdata, flags, rc):
