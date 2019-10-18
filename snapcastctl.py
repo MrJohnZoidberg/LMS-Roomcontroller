@@ -81,8 +81,8 @@ class SnapserverControll:
 class SnapcastControll:
     def __init__(self, mqtt_client, bltctl, mpdctl, config):
         self.mqtt_client = mqtt_client
-        self.site_id = config['device']['site_id']
-        self.room_name = config['device']['room_name']
+        self.site_id = config['snips']['device']['site_id']
+        self.room_name = config['snips']['device']['room_name']
         self.bltctl = bltctl
         self.mpdctl = mpdctl
         self.config = config
