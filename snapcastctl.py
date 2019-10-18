@@ -89,7 +89,7 @@ class SnapcastControll:
 
     def send_site_info(self, client=None, userdata=None, msg=None):
         payload = {'room_name': self.room_name, 'site_id': self.site_id}
-        self.mqtt_client.publish('bluetooth/answer/siteInfo', payload=json.dumps(payload))
+        self.mqtt_client.publish('snapcast/answer/siteInfo', payload=json.dumps(payload))
 
     def send_device_names(self, client, userdata, msg):
         available_bluetooth_devices = [d['name'] for d in self.bltctl.bl_helper.get_available_devices()]
