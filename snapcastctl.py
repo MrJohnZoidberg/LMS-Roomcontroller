@@ -46,3 +46,38 @@ class SnapclientControll:
             print(f"Successfully stopped Snapclient with soundcard <{soundcard}>.")
         else:
             print(f"Failed to stop Snapclient with soundcard <{soundcard}>.")
+
+
+class SnapserverControll:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def is_active(soundcard):
+        expect_list = [r"active \(running\)", r"inactive \(dead\)", "could not be found"]
+        result = pexpect.spawnu(f"systemctl status snapclient@{soundcard}").expect(expect_list) == 0
+        return result
+
+    def start(self, client, userdata, msg):
+        data = json.loads(msg.payload.decode("utf-8"))
+        expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
+        result = pexpect.spawnu("systemctl restart -f snapserver").expect(expect_list, 4) == 0
+        if result:
+            print("Successfully started Snapserver.")
+        else:
+            print("Failed to start Snapserver.")
+
+    @staticmethod
+    def stop(client, userdata, msg):
+        data = json.loads(msg.payload.decode("utf-8"))
+        expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
+        result = pexpect.spawnu("systemctl stop -f snapserver").expect(expect_list, 4) == 0
+        if result:
+            print("Successfully stopped Snapserver.")
+        else:
+            print("Failed to stop Snapserver.")
+
+
+class SnapcastControll:
+    def __init__(self):
+        pass
