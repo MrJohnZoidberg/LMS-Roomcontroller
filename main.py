@@ -16,7 +16,9 @@ def on_connect(client, userdata, flags, rc):
     client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceDisconnect', bl.disconnect)
     client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceRemove', bl.remove)
     client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceLists', bl.send_device_lists)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/siteInfo', bl.send_site_info)
     client.message_callback_add('bluetooth/request/allSites/deviceLists', bl.send_device_lists)
+    client.message_callback_add('bluetooth/request/allSites/siteInfo', bl.send_site_info)
     client.subscribe(f'bluetooth/request/oneSite/{site_id}/#')
     client.subscribe('bluetooth/request/allSites/#')
 
