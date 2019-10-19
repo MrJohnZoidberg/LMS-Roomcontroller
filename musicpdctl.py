@@ -66,7 +66,8 @@ class MPDControll:
         self.delete_queue()
         for song in songs:
             self.add_song_to_queue(song)
-        self.start_playback()
+            if song == songs[0]:
+                self.start_playback()
 
     def stop_playback(self):
         process = pexpect.spawnu("mpc stop", echo=False, timeout=10)
@@ -81,5 +82,5 @@ class MPDControll:
         process.expect([pexpect.EOF])
 
     def add_song_to_queue(self, song):
-        process = pexpect.spawnu(f'mpc add \"{song}\"', echo=False, timeout=2)
+        process = pexpect.spawnu(f'mpc add \"{song}\"', echo=False, timeout=8)
         process.expect([pexpect.EOF])
