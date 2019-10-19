@@ -43,11 +43,11 @@ class MPDControll:
     def get_songs(artist=None, album=None, title=None):
         command_parts = ['mpc search']
         if artist:
-            command_parts.append(f'artist {artist}')
+            command_parts.append(f'artist "{artist}"')
         if album:
-            command_parts.append(f'album {album}')
+            command_parts.append(f'album "{album}"')
         if title:
-            command_parts.append(f'title {title}')
+            command_parts.append(f'title "{title}"')
         if len(command_parts) < 2:
             return "not yet implemented", None
         command = " ".join(command_parts)
