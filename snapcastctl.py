@@ -106,9 +106,10 @@ class SnapcastControll:
         self.mqtt_client.publish('snapcast/answer/siteDevices', payload=json.dumps(payload))
 
     def send_music_names(self, client, userdata, msg):
-        artists = self.mpdctl.list_database("artist")
-        albums = self.mpdctl.list_database("album")
-        titles = self.mpdctl.list_database("title")
+        artists = self.mpdctl.get_all_artists()
+        albums = self.mpdctl.get_all_albums()
+        titles = self.mpdctl.get_all_titles()
+        print(artists, albums, titles)
         #payload = {'artists': artists, 'albums': albums, 'titles': titles, 'site_id': self.site_id}
         #self.mqtt_client.publish('snapcast/answer/siteMusic', payload=json.dumps(payload))
 
