@@ -140,8 +140,8 @@ class SnapcastControll:
             default_soundcard = self.config['snapcast']['common']['default_soundcard']
             data['device'] = "Verstärker"
         available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
-        names_available_devices = [d['name'] if d not in self.bltctl.synonyms else self.bltctl.synonyms[d['name']]
-                                   for d in available_bluetooth_devices]
+        names_available_devices = [d['name'] if d['name'] not in self.bltctl.synonyms
+                                   else self.bltctl.synonyms[d['name']] for d in available_bluetooth_devices]
         if data['device'] in names_available_devices:
             addr = [d['mac_address'] for d in available_bluetooth_devices if d['name'] == data['device'] or
                     self.bltctl.synonyms[d['name']] == data['device']][0]
