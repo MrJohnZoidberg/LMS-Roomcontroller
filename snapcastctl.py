@@ -109,9 +109,8 @@ class SnapcastControll:
         artists = self.mpdctl.get_all_artists()
         albums = self.mpdctl.get_all_albums()
         titles = self.mpdctl.get_all_titles()
-        print(artists, albums, titles)
-        #payload = {'artists': artists, 'albums': albums, 'titles': titles, 'site_id': self.site_id}
-        #self.mqtt_client.publish('snapcast/answer/siteMusic', payload=json.dumps(payload))
+        payload = {'artists': artists, 'albums': albums, 'titles': titles, 'site_id': self.site_id}
+        self.mqtt_client.publish('snapcast/answer/siteMusic', payload=json.dumps(payload))
 
     def set_volume(self, slot_dict):
         url = f"http:///jsonrpc"
