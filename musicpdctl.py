@@ -64,8 +64,8 @@ class MPDControll:
         print(songs)
         self.stop_playback()
         self.delete_queue()
-        #for song in songs:
-        self.add_song_to_queue(songs[0])
+        for song in songs:
+            self.add_song_to_queue(song)
         self.start_playback()
 
     def stop_playback(self):
