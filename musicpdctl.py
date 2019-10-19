@@ -54,6 +54,8 @@ class MPDControll:
         process = pexpect.spawnu(command, echo=False, timeout=3)
         process.expect([pexpect.EOF])
         out = process.before.split("\r\n")
+        if out == [""]:
+            out = None
         if not out:
             return "no such songs", None
         return None, out
