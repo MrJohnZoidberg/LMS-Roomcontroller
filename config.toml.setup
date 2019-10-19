@@ -34,3 +34,10 @@ version = 1  # Do not delete this line, it's for Git update and setup.sh
     [snapcast.nbsoundcards]
     # The non-bluetooth ALSA soundcards
     # "<pronounceable_name>" = "<soundcard_name>"
+
+[mpd]
+
+    [mpd.common]
+    active = true
+    host = "localhost"
+    port = 6600

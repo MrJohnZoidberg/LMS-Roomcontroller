@@ -104,3 +104,18 @@ class SnapcastControll:
                 filtered_names.append(name)
         payload = {'names': filtered_names, 'site_id': self.site_id}
         self.mqtt_client.publish('snapcast/answer/siteDevices', payload=json.dumps(payload))
+
+    def send_music_names(self, client, userdata, msg):
+        artists = self.mpdctl.list_database("artist")
+        albums = self.mpdctl.list_database("album")
+        titles = self.mpdctl.list_database("title")
+        #payload = {'artists': artists, 'albums': albums, 'titles': titles, 'site_id': self.site_id}
+        #self.mqtt_client.publish('snapcast/answer/siteMusic', payload=json.dumps(payload))
+
+    def set_volume(self, slot_dict):
+        url = f"http:///jsonrpc"
+        headers = {'content-type': 'application/json'}
+        # Example echo method
+        payload = {"id": 8, "jsonrpc": "2.0", "method": "Client.GetStatus", "params": {"id": "b8:27:eb:65:d2:48"}}
+        #response = requests.post(url, data=json.dumps(payload), headers=headers).json()
+        #print(response)

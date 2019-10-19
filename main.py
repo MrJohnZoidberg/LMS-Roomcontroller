@@ -41,7 +41,7 @@ if __name__ == "__main__":
     mqtt_client = mqtt.Client()
 
     bltctl = bluetoothctl.Bluetooth(mqtt_client, config)
-    mpdctl = musicpdctl.MPDControll()
+    mpdctl = musicpdctl.MPDControll(config['mpd'])
     sncctl = snapcastctl.SnapcastControll(mqtt_client, bltctl, mpdctl, config)
 
     mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
