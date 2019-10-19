@@ -21,6 +21,7 @@ class MPDControll:
             for artist in artists_line:
                 if artist not in all_artists and artist != "":
                     all_artists.append(artist)
+        return all_artists
 
     def get_all_albums(self):
         output_list = self.list_database('album')
