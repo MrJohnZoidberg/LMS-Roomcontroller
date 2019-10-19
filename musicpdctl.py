@@ -79,5 +79,5 @@ class MPDControll:
         process.expect([pexpect.EOF])
 
     def add_song_to_queue(self, song):
-        process = pexpect.spawnu(f'mpc add "{song}"', echo=False, timeout=2)
+        process = pexpect.spawnu(f'mpc add \"{song}\"', echo=False, timeout=2)
         process.expect([pexpect.EOF])
