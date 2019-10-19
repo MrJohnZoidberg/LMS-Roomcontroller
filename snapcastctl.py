@@ -136,27 +136,33 @@ class SnapcastControll:
             payload = {'err': err, 'site_id': self.site_id}
             self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
             return
-        if data.get('device'):
-            available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
-            names_available_devices = [d['name'] if d not in self.bltctl.synonyms else self.bltctl.synonyms[d['name']]
-                                       for d in available_bluetooth_devices]
-            if data['device'] in names_available_devices:
-                addr = [d['mac_address'] for d in available_bluetooth_devices if d['name'] == data['device'] or
-                        self.bltctl.synonyms[d['name']] == data['device']][0]
-                real_name = [d['name'] for d in available_bluetooth_devices if d['name'] == data['device'] or
-                             self.bltctl.synonyms[d['name']] == data['device']][0]
-                result = self.bltctl.bl_helper.connect(addr)
-                if not result:
-                    payload = {'err': "cannot connect to bluetooth device", 'site_id': self.site_id}
-                    self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
-                    return
-                soundcard = self.config['bluetooth']['soundcards'][real_name]
-                self.snapclientctl.service_start(soundcard, 0, addr)
-            elif data['device'] in [d for d in self.config['snapcast']['nbsoundcards']]:
-                self.snapclientctl.service_start(self.config['snapcast']['nbsoundcards'][data['device']], 0,
-                                                 data['device'])
+        if not data.get('device'):
+            default_soundcard = self.config['snapcast']['common']['default_soundcard']
+            data['device'] = "Verstärker"
+        available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
+        names_available_devices = [d['name'] if d not in self.bltctl.synonyms else self.bltctl.synonyms[d['name']]
+                                   for d in available_bluetooth_devices]
+        if data['device'] in names_available_devices:
+            addr = [d['mac_address'] for d in available_bluetooth_devices if d['name'] == data['device'] or
+                    self.bltctl.synonyms[d['name']] == data['device']][0]
+            real_name = [d['name'] for d in available_bluetooth_devices if d['name'] == data['device'] or
+                         self.bltctl.synonyms[d['name']] == data['device']][0]
+            result = self.bltctl.bl_helper.connect(addr)
+            if not result:
+                payload = {'err': "cannot connect to bluetooth device", 'site_id': self.site_id}
+                self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
+                return
+            soundcard = self.config['bluetooth']['soundcards'][real_name]
+            self.snapclientctl.service_start(soundcard, 0, addr)
+        elif data['device'] in [d for d in self.config['snapcast']['nbsoundcards']]:
+            self.snapclientctl.service_start(self.config['snapcast']['nbsoundcards'][data['device']], 0,
+                                             data['device'])
+        else:
+            payload = {'err': "no such device", 'site_id': self.site_id}
+            self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
+            return
 
-        self.mpdctl.play(songs)
+        self.mpdctl.play_songs(songs)
 
     def set_volume(self, slot_dict):
         url = f"http:///jsonrpc"
