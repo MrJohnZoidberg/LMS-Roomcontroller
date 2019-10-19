@@ -113,7 +113,7 @@ class SnapcastControll:
             'site_id': self.site_id,
             'mpd_status': self.config['mpd']['common']['is_active'],
             'available_blt_devices': [d['name'] if d not in self.bltctl.synonyms else self.bltctl.synonyms[d['name']]
-                                      for d in self.bltctl.get_available_devices()],
+                                      for d in self.bltctl.bl_helper.get_available_devices()],
             'conf_blt_devices': [d if d not in self.config['bluetooth']['synonyms']
                                  else self.config['bluetooth']['synonyms'][d]
                                  for d in self.config['bluetooth']['soundcards']],
@@ -136,7 +136,7 @@ class SnapcastControll:
             self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
             return
         if data.get('device'):
-            available_bluetooth_devices = self.bltctl.get_available_devices()
+            available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
             names_available_devices = [d['name'] if d not in self.bltctl.synonyms else self.bltctl.synonyms[d['name']]
                                        for d in available_bluetooth_devices]
             if data['device'] in names_available_devices:
