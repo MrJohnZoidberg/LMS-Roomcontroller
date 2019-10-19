@@ -54,14 +54,13 @@ class MPDControll:
         process = pexpect.spawnu(command, echo=False, timeout=3)
         process.expect([pexpect.EOF])
         out = process.before.split("\r\n")
-        if out == [""]:
-            out = None
-        if not out:
+        songs = [song for song in out if song]
+        print(songs)
+        if not songs:
             return "no such songs", None
-        return None, out
+        return None, songs
 
     def play_songs(self, songs):
-        print(songs)
         self.stop_playback()
         self.delete_queue()
         for song in songs:
