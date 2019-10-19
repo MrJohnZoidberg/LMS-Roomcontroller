@@ -38,3 +38,25 @@ class MPDControll:
             if title not in all_titles and title != "":
                 all_titles.append(title)
         return all_titles
+
+    @staticmethod
+    def get_songs(artist=None, album=None, title=None):
+        command_parts = ['mpc search']
+        if artist:
+            command_parts.append(f'artist {artist}')
+        if album:
+            command_parts.append(f'album {album}')
+        if title:
+            command_parts.append(f'title {title}')
+        if len(command_parts) < 2:
+            return "not yet implemented", None
+        command = " ".join(command_parts)
+        process = pexpect.spawnu(command, echo=False, timeout=3)
+        process.expect([pexpect.EOF])
+        out = process.before.split("\r\n")
+        if not out:
+            return "no such songs", None
+        return None, out
+
+    def play_songs(self, songs):
+        print(songs)

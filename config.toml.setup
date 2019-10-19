@@ -38,6 +38,5 @@ version = 1  # Do not delete this line, it's for Git update and setup.sh
 [mpd]
 
     [mpd.common]
-    active = true
-    host = "localhost"
-    port = 6600
+    is_active = true
+
