@@ -24,6 +24,7 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe('bluetooth/request/allSites/#')
 
     client.message_callback_add('snapcast/request/allSites/siteDevices', sncctl.send_device_names)
+    client.message_callback_add('snapcast/request/allSites/siteMusic', sncctl.send_music_names)
     client.subscribe('snapcast/request/allSites/#')
 
 
