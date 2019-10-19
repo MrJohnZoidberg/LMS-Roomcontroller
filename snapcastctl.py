@@ -112,7 +112,8 @@ class SnapcastControll:
             'room_name': self.room_name,
             'site_id': self.site_id,
             'mpd_status': self.config['mpd']['common']['is_active'],
-            'available_blt_devices': [d['name'] if d not in self.bltctl.synonyms else self.bltctl.synonyms[d['name']]
+            'available_blt_devices': [d['name'] if d['name'] not in self.bltctl.synonyms
+                                      else self.bltctl.synonyms[d['name']]
                                       for d in self.bltctl.bl_helper.get_available_devices()],
             'conf_blt_devices': [d if d not in self.config['bluetooth']['synonyms']
                                  else self.config['bluetooth']['synonyms'][d]
