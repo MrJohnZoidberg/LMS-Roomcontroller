@@ -114,11 +114,13 @@ class FlowControll:
 
         if device_info.get('bluetooth'):
             addr = device_info['bluetooth']['addr']
-            result = self.bltctl.bl_helper.connect(addr)
-            if not result:
-                payload = {'err': "cannot connect to bluetooth device", 'site_id': self.site_id}
-                self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
-                return
+            if addr not in self.bltctl.connected_devices:
+                result = self.bltctl.bl_helper.connect(addr)
+                if not result:
+                    payload = {'err': "cannot connect to bluetooth device", 'site_id': self.site_id}
+                    self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
+                    return
+
         # TODO: Latency
         self.sncctl.snapclientctl.service_start(device_info['soundcard'], 0, device_info['real_name'])
 
