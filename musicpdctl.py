@@ -19,7 +19,7 @@ class MPDControll:
         process = pexpect.spawnu(command, echo=False, timeout=3)
         process.expect([pexpect.EOF])
         out = process.before.split("\r\n")
-        print(len(out))
+        print(out, "\n\n")
         return out[0]
 
     @staticmethod
