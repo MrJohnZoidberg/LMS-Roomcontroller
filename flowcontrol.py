@@ -99,6 +99,7 @@ class FlowControll:
             while len(all_titles) > int(self.config['mpd']['common']['shuffled_max_len']):
                 del all_titles[random.randrange(0, len(all_titles))]
             songs = [self.mpdctl.find_type('title', title) for title in all_titles]
+            print(songs)
             random.shuffle(songs)
 
         device_info = self.get_device_info(data.get('device'))
