@@ -125,4 +125,9 @@ class FlowControll:
         if not self.sncctl.snapclientctl.is_active(device_info['soundcard']):
             self.sncctl.snapclientctl.service_start(device_info['soundcard'], 0, device_info['real_name'])
 
-        self.mpdctl.play_songs(songs)
+        self.mpdctl.stop_playback()
+        self.mpdctl.delete_queue()
+        for song in songs:
+            self.mpdctl.add_song_to_queue(song)
+            if song == songs[0]:
+                self.mpdctl.start_playback()
