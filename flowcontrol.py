@@ -105,6 +105,7 @@ class FlowControll:
                 if song:
                     songs.append(song)
 
+        print("Connect to device")
         device_info = self.get_device_info(data.get('device'))
 
         if not device_info:
