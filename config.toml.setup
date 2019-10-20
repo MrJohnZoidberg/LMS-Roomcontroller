@@ -29,7 +29,8 @@ version = 1  # Do not delete this line, it's for Git update and setup.sh
 [snapcast]
 
     [snapcast.common]
-    default_soundcard = "bluetooth_speaker"  # if Room slot is "here" # TODO: Use this
+    default_soundcard = "bluetooth_speaker"  # if Room slot is "here" or empty
+    wake_word_pause = false
 
     [snapcast.nbsoundcards]
     # The non-bluetooth ALSA soundcards
@@ -39,4 +40,4 @@ version = 1  # Do not delete this line, it's for Git update and setup.sh
 
     [mpd.common]
     is_active = true
-
+    shuffled_max_len = 100

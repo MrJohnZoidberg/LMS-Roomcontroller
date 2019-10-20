@@ -5,6 +5,7 @@ import paho.mqtt.client as mqtt
 import bluetoothctl
 import snapcastctl
 import musicpdctl
+import flowcontrol
 
 MQTT_BROKER_ADDRESS = "localhost:1883"
 MQTT_USERNAME = None
@@ -23,9 +24,9 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(f'bluetooth/request/oneSite/{site_id}/#')
     client.subscribe('bluetooth/request/allSites/#')
 
-    client.message_callback_add(f'snapcast/request/oneSite/{site_id}/playMusic', sncctl.play_music)
-    client.message_callback_add('snapcast/request/allSites/siteInfo', sncctl.send_site_info)
-    client.message_callback_add('snapcast/request/allSites/siteMusic', sncctl.send_music_names)
+    client.message_callback_add(f'snapcast/request/oneSite/{site_id}/playMusic', flowctl.msg_play_music)
+    client.message_callback_add('snapcast/request/allSites/siteInfo', flowctl.msg_send_site_info)
+    client.message_callback_add('snapcast/request/allSites/siteMusic', flowctl.msg_send_mpd_database_content)
     client.subscribe(f'snapcast/request/oneSite/{site_id}/#')
     client.subscribe('snapcast/request/allSites/#')
 
@@ -39,13 +40,13 @@ if __name__ == "__main__":
     if 'mqtt_password' in config['snips']['common']:
         MQTT_PASSWORD = config['snips']['common']['mqtt_password']
     site_id = config['snips']['device']['site_id']
-    room_name = config['snips']['device']['room_name']
 
     mqtt_client = mqtt.Client()
 
     bltctl = bluetoothctl.Bluetooth(mqtt_client, config)
-    mpdctl = musicpdctl.MPDControll(config['mpd'])
-    sncctl = snapcastctl.SnapcastControll(mqtt_client, bltctl, mpdctl, config)
+    sncctl = snapcastctl.SnapcastControll(mqtt_client, config)
+    mpdctl = musicpdctl.MPDControll()
+    flowctl = flowcontrol.FlowControll(mqtt_client, config, bltctl, sncctl, mpdctl)
 
     mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
     mqtt_client.on_connect = on_connect
@@ -53,5 +54,5 @@ if __name__ == "__main__":
 
     bltctl.send_site_info()
     bltctl.send_device_lists()
-    sncctl.send_site_info()
+    flowctl.send_site_info()
     mqtt_client.loop_forever()
