@@ -84,28 +84,6 @@ class FlowControll:
     def msg_play_music(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
 
-        if data.get('artist') or data.get('album') or data.get('title'):
-            # Filter songs -> var songs is a list which contains paths of filtered songs
-            songs = self.mpdctl.search_songs(data.get('artist'), data.get('album'), data.get('title'))
-            if not songs:
-                payload = {'err': "no such songs", 'site_id': self.site_id}
-                self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
-                return
-            if data.get('artist') and not data.get('album') and not data.get('title'):
-                random.shuffle(songs)
-        else:
-            # Make shuffled queue
-            all_titles = self.mpdctl.list_type('title')
-            while len(all_titles) > int(self.config['mpd']['common']['shuffled_max_len']):
-                del all_titles[random.randrange(0, len(all_titles))]
-            random.shuffle(all_titles)
-            songs = list()
-            for title in all_titles:
-                song = self.mpdctl.find_type('title', title)
-                if song:
-                    songs.append(song)
-
-        print("Connect to device")
         device_info = self.get_device_info(data.get('device'))
 
         if not device_info:
@@ -126,9 +104,36 @@ class FlowControll:
         if not self.sncctl.snapclientctl.is_active(device_info['soundcard']):
             self.sncctl.snapclientctl.service_start(device_info['soundcard'], 0, device_info['real_name'])
 
-        self.mpdctl.stop_playback()
-        self.mpdctl.delete_queue()
-        for song in songs:
-            self.mpdctl.add_song_to_queue(song)
-            if song == songs[0]:
-                self.mpdctl.start_playback()
+        if data.get('artist') or data.get('album') or data.get('title'):
+            # Filter songs -> var songs is a list which contains paths of filtered songs
+            songs = self.mpdctl.search_songs(data.get('artist'), data.get('album'), data.get('title'))
+            if not songs:
+                payload = {'err': "no such songs", 'site_id': self.site_id}
+                self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
+                return
+            if data.get('artist') and not data.get('album') and not data.get('title'):
+                random.shuffle(songs)
+
+            self.mpdctl.stop_playback()
+            self.mpdctl.delete_queue()
+            for song in songs:
+                self.mpdctl.add_song_to_queue(song)
+                if song == songs[0]:
+                    self.mpdctl.start_playback()
+        else:
+            # Make shuffled queue
+            all_titles = self.mpdctl.list_type('title')
+            while len(all_titles) > int(self.config['mpd']['common']['shuffled_max_len']):
+                del all_titles[random.randrange(0, len(all_titles))]
+            random.shuffle(all_titles)
+
+            self.mpdctl.stop_playback()
+            self.mpdctl.delete_queue()
+            songs_added = 0
+            for title in all_titles:
+                song = self.mpdctl.find_type('title', title)
+                if song:
+                    self.mpdctl.add_song_to_queue(song)
+                    songs_added += 1
+                if songs_added == 1:
+                    self.mpdctl.start_playback()
