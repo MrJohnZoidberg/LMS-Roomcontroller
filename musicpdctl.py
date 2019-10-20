@@ -19,7 +19,8 @@ class MPDControll:
         process = pexpect.spawnu(command, echo=False, timeout=3)
         process.expect([pexpect.EOF])
         out = process.before.split("\r\n")
-        return [entry for entry in out if entry]
+        print(len(out))
+        return out[0]
 
     @staticmethod
     def search_songs(artist=None, album=None, title=None):
