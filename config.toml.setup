@@ -40,4 +40,4 @@ version = 1  # Do not delete this line, it's for Git update and setup.sh
 
     [mpd.common]
     is_active = true
-    shuffled_max_len = 100
+    shuffled_max_len = 50
