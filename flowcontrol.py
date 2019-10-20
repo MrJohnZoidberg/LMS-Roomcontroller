@@ -122,6 +122,7 @@ class FlowControll:
                     return
 
         # TODO: Latency
-        self.sncctl.snapclientctl.service_start(device_info['soundcard'], 0, device_info['real_name'])
+        if not self.sncctl.snapclientctl.is_active(device_info['soundcard']):
+            self.sncctl.snapclientctl.service_start(device_info['soundcard'], 0, device_info['real_name'])
 
         self.mpdctl.play_songs(songs)
