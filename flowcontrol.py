@@ -101,7 +101,7 @@ class FlowControll:
             songs = [self.mpdctl.find_type('title', title) for title in all_titles]
             random.shuffle(songs)
 
-        device_info = self.get_device_info(data['device'])
+        device_info = self.get_device_info(data.get('device'))
 
         if not device_info:
             payload = {'err': "no such device", 'site_id': self.site_id}
