@@ -113,6 +113,11 @@ class BluetoothHelper:
         res = self.process.expect(["Failed to connect", "Connection successful", pexpect.TIMEOUT, pexpect.EOF], 6) == 1
         return res
 
+    def is_connected(self, mac_address):
+        self.process.send(f"info {mac_address}\n")
+        res = self.process.expect(["Connected: no", "Connected: yes", pexpect.TIMEOUT, pexpect.EOF], 3) == 1
+        return res
+
     def disconnect(self, mac_address):
         """Try to disconnect to a device by mac address."""
         self.process.send(f"disconnect {mac_address}\n")
@@ -133,13 +138,17 @@ class Bluetooth:
         self.synonyms = config['bluetooth']['synonyms']
 
     def thread_wait_until_disconnect(self, addr):
-        self.bl_helper.wait_for_disconnect(addr)
-        time.sleep(2)
-        if addr in self.connected_devices:
-            del self.connected_devices[addr]
-            self.send_device_lists()
-            payload = {'siteId': self.site_id, 'result': True, 'addr': addr}
-            self.mqtt_client.publish('bluetooth/answer/deviceDisconnect', payload=json.dumps(payload))
+        while addr in self.connected_devices:
+            time.sleep(5)
+            if not self.bl_helper.is_connected(addr):
+                del self.connected_devices[addr]
+        #self.bl_helper.wait_for_disconnect(addr)
+        #time.sleep(2)
+        #if addr in self.connected_devices:
+        #    del self.connected_devices[addr]
+        self.send_device_lists()
+        payload = {'siteId': self.site_id, 'result': True, 'addr': addr}
+        self.mqtt_client.publish('bluetooth/answer/deviceDisconnect', payload=json.dumps(payload))
 
     def thread_discover(self):
         result = self.bl_helper.start_discover()
@@ -160,10 +169,10 @@ class Bluetooth:
             if addr not in self.connected_devices:
                 name = [d['name'] for d in self.bl_helper.get_available_devices() if d['mac_address'] == addr][0]
                 self.connected_devices[addr] = name
-                if addr not in self.threadobjs_wait_disconnect:
-                    self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
-                                                                             args=(addr,))
-                    self.threadobjs_wait_disconnect[addr].start()
+            if addr not in self.threadobjs_wait_disconnect:
+                self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
+                                                                         args=(addr,))
+                self.threadobjs_wait_disconnect[addr].start()
         payload = {'siteId': self.site_id, 'result': result, 'addr': addr}
         self.mqtt_client.publish('bluetooth/answer/deviceConnect', payload=json.dumps(payload))
         self.send_device_lists()
