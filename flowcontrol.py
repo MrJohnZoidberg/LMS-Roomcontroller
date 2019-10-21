@@ -91,7 +91,6 @@ class FlowControll:
     def msg_disconnected(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
         if data['siteId'] == self.site_id:
-            print("Here")
             soundcard = [d['soundcard'] for d in self.get_device_list()
                          if d.get('bluetooth') and d['bluetooth']['addr'] == data['addr']]
             if soundcard:

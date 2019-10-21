@@ -30,6 +30,7 @@ def on_connect(client, userdata, flags, rc):
     client.message_callback_add('bluetooth/answer/deviceDisconnect', flowctl.msg_disconnected)
     client.subscribe(f'snapcast/request/oneSite/{site_id}/#')
     client.subscribe('snapcast/request/allSites/#')
+    client.subscribe('bluetooth/answer/deviceDisconnect')
 
 
 if __name__ == "__main__":
