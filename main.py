@@ -27,6 +27,7 @@ def on_connect(client, userdata, flags, rc):
     client.message_callback_add(f'snapcast/request/oneSite/{site_id}/playMusic', flowctl.msg_play_music)
     client.message_callback_add('snapcast/request/allSites/siteInfo', flowctl.msg_send_site_info)
     client.message_callback_add('snapcast/request/allSites/siteMusic', flowctl.msg_send_mpd_database_content)
+    client.message_callback_add('bluetooth/answer/deviceDisconnect', flowctl.msg_disconnected)
     client.subscribe(f'snapcast/request/oneSite/{site_id}/#')
     client.subscribe('snapcast/request/allSites/#')
 

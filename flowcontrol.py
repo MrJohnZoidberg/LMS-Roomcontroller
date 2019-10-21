@@ -99,7 +99,12 @@ class FlowControll:
     def msg_play_music(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
 
-        device_info = [d for d in self.get_device_list() if data['device'] in d['names_list']]
+        if not data.get('device'):
+            default_soundcard = self.config['snapcast']['common']['default_soundcard']
+            device_info = [d for d in self.get_device_list() if default_soundcard == d['soundcard']]
+        else:
+            device_info = [d for d in self.get_device_list() if data['device'] in d['names_list']]
+
         if not device_info:
             payload = {'err': "no such device", 'site_id': self.site_id}
             self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
