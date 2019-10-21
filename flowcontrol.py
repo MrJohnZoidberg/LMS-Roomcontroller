@@ -116,7 +116,7 @@ class FlowControll:
         if device_info['bluetooth']:
             addr = device_info['bluetooth']['addr']
             if addr not in self.bltctl.connected_devices:
-                result = self.bltctl.connect(addr)
+                result = self.bltctl.connect_with_block(addr)
                 if not result:
                     payload = {'err': "cannot connect to bluetooth device", 'site_id': self.site_id}
                     self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
