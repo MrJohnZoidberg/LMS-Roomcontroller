@@ -25,13 +25,10 @@ class BluetoothHelper:
         """Start bluetooth scanning process."""
         self.process.send(f"scan off\n")
         expects = ["Failed to stop discovery", "Discovery stopped", pexpect.EOF, pexpect.TIMEOUT]
+        self.process.expect(expects, 2)
+        self.process.send(f"scan on\n")
+        expects = ["Failed to start discovery", "Discovery started", pexpect.EOF, pexpect.TIMEOUT]
         res = self.process.expect(expects, 2)
-        print(1, res)
-        if res == 1:
-            self.process.send(f"scan on\n")
-            expects = ["Failed to start discovery", "Discovery started", pexpect.EOF, pexpect.TIMEOUT]
-            res = self.process.expect(expects, 2)
-            print(2, res)
         return res == 1
 
     def make_discoverable(self):
