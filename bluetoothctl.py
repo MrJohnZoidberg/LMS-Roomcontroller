@@ -208,9 +208,10 @@ class Bluetooth:
 
     def connect_with_block(self, addr):
         result = self.bl_helper.connect(addr)
-        if result and addr not in self.connected_devices:
-            name = [d['name'] for d in self.bl_helper.get_available_devices() if d['mac_address'] == addr][0]
-            self.connected_devices[addr] = name
+        if result:
+            if addr not in self.connected_devices:
+                name = [d['name'] for d in self.bl_helper.get_available_devices() if d['mac_address'] == addr][0]
+                self.connected_devices[addr] = name
             if addr not in self.threadobjs_wait_disconnect:
                 self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
                                                                          args=(addr,))
