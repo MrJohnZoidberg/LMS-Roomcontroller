@@ -190,34 +190,55 @@ class Bluetooth:
         self.mqtt_client.publish('bluetooth/answer/deviceRemove', payload=json.dumps(payload))
         self.send_device_lists()
 
-    def discover(self, client, userdata, msg):
+    def msg_discover(self, client, userdata, msg):
         if 'discover' in self.threadobjs:
             del self.threadobjs['discover']
         self.threadobjs['discover'] = threading.Thread(target=self.thread_discover)
         self.threadobjs['discover'].start()
 
-    def connect(self, client, userdata, msg):
+    def msg_connect(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
+        self.connect(data['addr'])
+
+    def connect(self, addr):
         if 'connect' in self.threadobjs:
             del self.threadobjs['connect']
-        self.threadobjs['connect'] = threading.Thread(target=self.thread_connect, args=(data['addr'],))
+        self.threadobjs['connect'] = threading.Thread(target=self.thread_connect, args=(addr,))
         self.threadobjs['connect'].start()
 
-    def disconnect(self, client, userdata, msg):
+    def connect_with_block(self, addr):
+        result = self.bl_helper.connect(addr)
+        if result and addr not in self.connected_devices:
+            name = [d['name'] for d in self.bl_helper.get_available_devices() if d['mac_address'] == addr][0]
+            self.connected_devices[addr] = name
+            if addr not in self.threadobjs_wait_disconnect:
+                self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
+                                                                         args=(addr,))
+                self.threadobjs_wait_disconnect[addr].start()
+        self.send_device_lists()
+        return result
+
+    def msg_disconnect(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
         if 'disconnect' in self.threadobjs:
             del self.threadobjs['disconnect']
         self.threadobjs['disconnect'] = threading.Thread(target=self.thread_disconnect, args=(data['addr'],))
         self.threadobjs['disconnect'].start()
 
-    def remove(self, client, userdata, msg):
+    def msg_remove(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
         if 'remove' in self.threadobjs:
             del self.threadobjs['remove']
         self.threadobjs['remove'] = threading.Thread(target=self.thread_remove, args=(data['addr'],))
         self.threadobjs['remove'].start()
 
-    def send_device_lists(self, client=None, userdata=None, msg=None):
+    def msg_send_device_lists(self, client, userdata, msg):
+        self.send_device_lists()
+
+    def msg_send_site_info(self, client, userdata, msg):
+        self.send_site_info()
+
+    def send_device_lists(self):
         payload = {'available_devices': self.bl_helper.get_available_devices(),
                    'paired_devices': self.bl_helper.get_paired_devices(),
                    'connected_devices': [{'mac_address': addr, 'name': self.connected_devices[addr]}
@@ -225,6 +246,6 @@ class Bluetooth:
                    'siteId': self.site_id}
         self.mqtt_client.publish('bluetooth/answer/deviceLists', payload=json.dumps(payload))
 
-    def send_site_info(self, client=None, userdata=None, msg=None):
+    def send_site_info(self):
         payload = {'room_name': self.room_name, 'site_id': self.site_id, 'synonyms': self.synonyms}
         self.mqtt_client.publish('bluetooth/answer/siteInfo', payload=json.dumps(payload))

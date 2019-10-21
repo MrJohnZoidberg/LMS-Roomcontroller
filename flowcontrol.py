@@ -12,19 +12,54 @@ class FlowControll:
         self.mpdctl = mpdctl
         self.site_id = config['snips']['device']['site_id']
         self.room_name = config['snips']['device']['room_name']
+        self.area = config['snips']['device']['area']
+
+    def get_device_list(self):
+        devices = list()
+        blt_soundcards = self.config['bluetooth']['soundcards']
+        blt_synonyms = self.config['bluetooth']['synonyms']
+        nonblt_soundcards = self.config['snapcast']['nbsoundcards']
+        available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
+
+        for name in blt_soundcards:
+            names_list = [name]
+            if name in blt_synonyms:
+                synonym = blt_synonyms[name]
+                names_list.append(synonym)
+            else:
+                synonym = None
+            addr = [d['mac_address'] for d in available_bluetooth_devices if d['name'] == name]
+            if addr:
+                addr = addr[0]
+            else:
+                addr = None
+            device = {
+                'name': name,
+                'names_list': names_list,
+                'synonym': synonym,
+                'bluetooth': {'addr': addr},
+                'soundcard': blt_soundcards[name]
+            }
+            devices.append(device)
+
+        for name in nonblt_soundcards:
+            device = {
+                'name': name,
+                'names_list': [name],
+                'synonym': None,
+                'bluetooth': None,
+                'soundcard': nonblt_soundcards[name]
+            }
+            devices.append(device)
+        return devices
 
     def send_site_info(self):
         payload = {
             'room_name': self.room_name,
             'site_id': self.site_id,
+            'area': self.area,
             'mpd_status': self.config['mpd']['common']['is_active'],
-            'available_blt_devices': [d['name'] if d['name'] not in self.bltctl.synonyms
-                                      else self.bltctl.synonyms[d['name']]
-                                      for d in self.bltctl.bl_helper.get_available_devices()],
-            'conf_blt_devices': [d if d not in self.config['bluetooth']['synonyms']
-                                 else self.config['bluetooth']['synonyms'][d]
-                                 for d in self.config['bluetooth']['soundcards']],
-            'conf_nonblt_devices': [d for d in self.config['snapcast']['nbsoundcards']]
+            'devices': self.get_device_list()
         }
         self.mqtt_client.publish('snapcast/answer/siteInfo', payload=json.dumps(payload))
 
@@ -34,67 +69,48 @@ class FlowControll:
     def msg_send_mpd_database_content(self, client, userdata, msg):
         artists = list()
         for line in self.mpdctl.list_type('artist'):
-            artists += re.split(r'; |;|, |,', line)
+            for artist in re.split(r'; |;|, |,', line):
+                if artist:
+                    artists.append(artist)
         albums = self.mpdctl.list_type('album')
         titles = self.mpdctl.list_type('title')
-        payload = {'artists': artists, 'albums': albums, 'titles': titles, 'site_id': self.site_id}
+        genres = list()
+        for line in self.mpdctl.list_type('genre'):
+            for genre in re.split(r'; |;|, |,|/| / ', line):
+                if genre:
+                    genres.append(genre)
+        payload = {
+            'artists': artists,
+            'albums': albums,
+            'titles': titles,
+            'genres': genres,
+            'site_id': self.site_id
+        }
         self.mqtt_client.publish('snapcast/answer/siteMusic', payload=json.dumps(payload))
 
-    def get_device_info(self, slot_device):
-        if not slot_device:
-            # Take the default soundcard
-            soundcard = self.config['snapcast']['common']['default_soundcard']
-            if soundcard in self.config['bluetooth']['soundcards'].values():
-                # It's a bluetooth soundcard
-                blt_soundcards = self.config['bluetooth']['soundcards']
-                real_name = [real_name for real_name in blt_soundcards if blt_soundcards[real_name] == soundcard][0]
-                available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
-                addr = [d['mac_address'] for d in available_bluetooth_devices if d['name'] == real_name][0]
-                info_dict = {'bluetooth': {'addr': addr}, 'soundcard': soundcard, 'real_name': real_name}
-            else:
-                # It's a non-bluetooth soundcard
-                nonblt_soundcards = self.config['snapcast']['nbsoundcards']
-                real_name = [real_name for real_name in nonblt_soundcards
-                             if nonblt_soundcards[real_name] == soundcard][0]
-                info_dict = {'bluetooth': None, 'soundcard': soundcard, 'real_name': real_name}
-        else:
-            if slot_device in self.config['snapcast']['nbsoundcards']:
-                # It's not a bluetooth device
-                soundcard = self.config['snapcast']['nbsoundcards'][slot_device]
-                nonblt_soundcards = self.config['snapcast']['nbsoundcards']
-                real_name = [real_name for real_name in nonblt_soundcards
-                             if nonblt_soundcards[real_name] == soundcard][0]
-                info_dict = {'bluetooth': None, 'soundcard': soundcard, 'real_name': real_name}
-            elif slot_device in self.config['bluetooth']['soundcards'] or \
-                    slot_device in self.config['bluetooth']['synonyms'].values():
-                # It's a bluetooth device
-                blt_soundcards = self.config['bluetooth']['soundcards']
-                blt_synonyms = self.config['bluetooth']['synonyms']
-                real_name = [real_name for real_name in blt_soundcards
-                             if real_name == slot_device or blt_synonyms[real_name] == slot_device][0]
-                soundcard = self.config['bluetooth']['soundcards'][real_name]
-                available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
-                addr = [d['mac_address'] for d in available_bluetooth_devices if d['name'] == real_name][0]
-                info_dict = {'bluetooth': {'addr': addr}, 'soundcard': soundcard, 'real_name': real_name}
-            else:
-                # Device doesn't exist
-                info_dict = None
-        return info_dict
+    def msg_disconnected(self, client, userdata, msg):
+        data = json.loads(msg.payload.decode("utf-8"))
+        if data['siteId'] == self.site_id:
+            soundcard = [d['soundcard'] for d in self.get_device_list()
+                         if d.get('bluetooth') and d['bluetooth']['addr'] == data['addr']]
+            if soundcard:
+                self.sncctl.snapclientctl.service_stop(soundcard[0])
 
     def msg_play_music(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
 
-        device_info = self.get_device_info(data.get('device'))
-
+        device_info = [d for d in self.get_device_list() if data['device'] in d['names_list']]
         if not device_info:
             payload = {'err': "no such device", 'site_id': self.site_id}
             self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
             return
+        else:
+            device_info = device_info[0]
 
-        if device_info.get('bluetooth'):
+        if device_info['bluetooth']:
             addr = device_info['bluetooth']['addr']
             if addr not in self.bltctl.connected_devices:
-                result = self.bltctl.bl_helper.connect(addr)
+                result = self.bltctl.connect(addr)
                 if not result:
                     payload = {'err': "cannot connect to bluetooth device", 'site_id': self.site_id}
                     self.mqtt_client.publish('snapcast/answer/playMusic', payload=json.dumps(payload))
@@ -102,7 +118,7 @@ class FlowControll:
 
         # TODO: Latency
         if not self.sncctl.snapclientctl.is_active(device_info['soundcard']):
-            self.sncctl.snapclientctl.service_start(device_info['soundcard'], 0, device_info['real_name'])
+            self.sncctl.snapclientctl.service_start(device_info['soundcard'], 0, device_info['name'])
 
         if data.get('artist') or data.get('album') or data.get('title'):
             # Filter songs -> var songs is a list which contains paths of filtered songs

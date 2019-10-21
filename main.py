@@ -13,14 +13,14 @@ MQTT_PASSWORD = None
 
 
 def on_connect(client, userdata, flags, rc):
-    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/devicesDiscover', bltctl.discover)
-    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceConnect', bltctl.connect)
-    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceDisconnect', bltctl.disconnect)
-    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceRemove', bltctl.remove)
-    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceLists', bltctl.send_device_lists)
-    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/siteInfo', bltctl.send_site_info)
-    client.message_callback_add('bluetooth/request/allSites/deviceLists', bltctl.send_device_lists)
-    client.message_callback_add('bluetooth/request/allSites/siteInfo', bltctl.send_site_info)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/devicesDiscover', bltctl.msg_discover)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceConnect', bltctl.msg_connect)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceDisconnect', bltctl.msg_disconnect)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceRemove', bltctl.msg_remove)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceLists', bltctl.msg_send_device_lists)
+    client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/siteInfo', bltctl.msg_send_site_info)
+    client.message_callback_add('bluetooth/request/allSites/deviceLists', bltctl.msg_send_device_lists)
+    client.message_callback_add('bluetooth/request/allSites/siteInfo', bltctl.msg_send_site_info)
     client.subscribe(f'bluetooth/request/oneSite/{site_id}/#')
     client.subscribe('bluetooth/request/allSites/#')
 
