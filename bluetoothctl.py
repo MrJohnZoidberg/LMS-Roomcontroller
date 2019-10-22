@@ -26,6 +26,7 @@ class BluetoothHelper:
         self.process.send(f"scan off\n")
         expects = ["Failed to stop discovery", "Discovery stopped", pexpect.EOF, pexpect.TIMEOUT]
         self.process.expect(expects, 2)
+        time.sleep(1)
         self.process.send(f"scan on\n")
         expects = ["Failed to start discovery", "Discovery started", pexpect.EOF, pexpect.TIMEOUT]
         res = self.process.expect(expects, 2)
@@ -119,6 +120,7 @@ class BluetoothHelper:
     def is_connected(self, mac_address):
         self.process.send(f"info {mac_address}\n")
         res = self.process.expect(["Connected: no", "Connected: yes", pexpect.TIMEOUT, pexpect.EOF], 3) == 1
+        self.process.expect([r"0;94m", pexpect.TIMEOUT, pexpect.EOF])
         return res
 
     def disconnect(self, mac_address):
