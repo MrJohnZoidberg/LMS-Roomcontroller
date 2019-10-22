@@ -53,6 +53,5 @@ if __name__ == "__main__":
     mqtt_client.connect(MQTT_BROKER_ADDRESS.split(":")[0], int(MQTT_BROKER_ADDRESS.split(":")[1]))
 
     bltctl.send_site_info()
-    bltctl.send_device_lists()
     flowctl.send_site_info()
     mqtt_client.loop_forever()
