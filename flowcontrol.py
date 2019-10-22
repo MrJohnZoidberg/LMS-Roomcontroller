@@ -93,7 +93,7 @@ class FlowControll:
         if data['siteId'] == self.site_id:
             soundcard = [d['soundcard'] for d in self.get_device_list()
                          if d.get('bluetooth') and d['bluetooth']['addr'] == data['addr']]
-            if soundcard:
+            if soundcard and self.sncctl.snapclientctl.is_active(soundcard[0]):
                 self.sncctl.snapclientctl.service_stop(soundcard[0])
 
     def msg_play_music(self, client, userdata, msg):
