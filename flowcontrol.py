@@ -57,15 +57,12 @@ class FlowControll:
             'area': self.area,
             'devices': self.get_device_list()
         }
-        self.mqtt_client.publish('snapcast/answer/siteInfo', payload=json.dumps(payload))
+        self.mqtt_client.publish('squeezebox/answer/siteInfo', payload=json.dumps(payload))
 
     def msg_send_site_info(self, client, userdata, msg):
         self.send_site_info()
 
     def msg_disconnected(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        if data['siteId'] == self.site_id:
-            soundcard = [d['soundcard'] for d in self.get_device_list()
-                         if d.get('bluetooth') and d['bluetooth']['addr'] == data['addr']]
-            if soundcard and self.sqectl.is_active():
-                self.sqectl.service_stop()
+        if data['siteId'] == self.site_id and self.sqectl.is_active():
+            self.sqectl.service_stop()

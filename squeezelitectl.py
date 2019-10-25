@@ -19,7 +19,7 @@ class SqueezeliteControll:
                 args.append(f"-o {soundcard}")
             name = self.config['snips']['device']['room_name']
             args.append(f"-n \'{name}\'")
-            f.write('SNAPCLIENT_OPTS="{args}"\n'.format(args=" ".join(args)))
+            f.write('SB_EXTRA_ARGS=="{args}"\n'.format(args=" ".join(args)))
 
     def service_start(self, soundcard):
         self.write_environment_file(soundcard)
