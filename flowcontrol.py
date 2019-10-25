@@ -15,7 +15,7 @@ class FlowControll:
         devices = list()
         blt_soundcards = self.config['bluetooth']['soundcards']
         blt_synonyms = self.config['bluetooth']['synonyms']
-        nonblt_soundcards = self.config['snapcast']['nbsoundcards']
+        # nonblt_soundcards = self.config['squeezelite']['nbsoundcards']
         available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
 
         for name in blt_soundcards:
@@ -39,6 +39,7 @@ class FlowControll:
             }
             devices.append(device)
 
+        """
         for name in nonblt_soundcards:
             device = {
                 'name': name,
@@ -48,6 +49,7 @@ class FlowControll:
                 'soundcard': nonblt_soundcards[name]
             }
             devices.append(device)
+        """
         return devices
 
     def send_site_info(self):
