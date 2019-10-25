@@ -21,10 +21,10 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(f'bluetooth/request/oneSite/{site_id}/#')
     client.subscribe('bluetooth/request/allSites/#')
 
-    client.message_callback_add('snapcast/request/allSites/siteInfo', flowctl.msg_send_site_info)
+    client.message_callback_add('squeezebox/request/allSites/siteInfo', flowctl.msg_send_site_info)
     client.message_callback_add('bluetooth/answer/deviceDisconnect', flowctl.msg_disconnected)
-    client.subscribe(f'snapcast/request/oneSite/{site_id}/#')
-    client.subscribe('snapcast/request/allSites/#')
+    client.subscribe(f'squeezebox/request/oneSite/{site_id}/#')
+    client.subscribe('squeezebox/request/allSites/#')
     client.subscribe('bluetooth/answer/deviceDisconnect')
 
 
