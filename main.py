@@ -3,8 +3,7 @@
 import toml
 import paho.mqtt.client as mqtt
 import bluetoothctl
-import snapcastctl
-import musicpdctl
+import squeezelitectl
 import flowcontrol
 
 MQTT_BROKER_ADDRESS = "localhost:1883"
@@ -22,9 +21,7 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(f'bluetooth/request/oneSite/{site_id}/#')
     client.subscribe('bluetooth/request/allSites/#')
 
-    client.message_callback_add(f'snapcast/request/oneSite/{site_id}/playMusic', flowctl.msg_play_music)
     client.message_callback_add('snapcast/request/allSites/siteInfo', flowctl.msg_send_site_info)
-    client.message_callback_add('snapcast/request/allSites/siteMusic', flowctl.msg_send_mpd_database_content)
     client.message_callback_add('bluetooth/answer/deviceDisconnect', flowctl.msg_disconnected)
     client.subscribe(f'snapcast/request/oneSite/{site_id}/#')
     client.subscribe('snapcast/request/allSites/#')
@@ -44,9 +41,8 @@ if __name__ == "__main__":
     mqtt_client = mqtt.Client()
 
     bltctl = bluetoothctl.Bluetooth(mqtt_client, config)
-    sncctl = snapcastctl.SnapcastControll(mqtt_client, config)
-    mpdctl = musicpdctl.MPDControll()
-    flowctl = flowcontrol.FlowControll(mqtt_client, config, bltctl, sncctl, mpdctl)
+    sqectl = squeezelitectl.SqueezeliteControll(config)
+    flowctl = flowcontrol.FlowControll(mqtt_client, config, bltctl, sqectl)
 
     mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
     mqtt_client.on_connect = on_connect
