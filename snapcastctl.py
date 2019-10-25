@@ -1,19 +1,18 @@
 import pexpect
-import json
 
 
-class SnapclientControll:
+class SqueezeliteControll:
     def __init__(self):
         pass
 
     @staticmethod
-    def is_active(soundcard):
+    def is_active():
         expect_list = [r"active \(running\)", r"inactive \(dead\)", "could not be found"]
-        result = pexpect.spawnu(f"systemctl status snapclient@{soundcard}").expect(expect_list) == 0
+        result = pexpect.spawnu(f"systemctl status squeezelite").expect(expect_list) == 0
         return result
 
     @staticmethod
-    def write_environment_file(soundcard, latency, client_id):
+    def write_environment_file(soundcard):
         with open("/etc/default/snapclient", "w") as f:
             args = []
             if soundcard:
@@ -24,23 +23,23 @@ class SnapclientControll:
                 args.append(f"--hostID {client_id}")
             f.write('SNAPCLIENT_OPTS="{args}"\n'.format(args=" ".join(args)))
 
-    def service_start(self, soundcard, latency, client_id):
-        self.write_environment_file(soundcard, latency, client_id)
+    def service_start(self, soundcard):
+        self.write_environment_file(soundcard)
         expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
-        result = pexpect.spawnu(f"systemctl restart -f snapclient@{soundcard}").expect(expect_list, 4) == 0
+        result = pexpect.spawnu(f"systemctl restart -f squeezelite").expect(expect_list, 4) == 0
         if result:
-            print(f"Successfully started Snapclient with soundcard <{soundcard}>.")
+            print(f"Successfully started Squeezelite.")
         else:
-            print(f"Failed to start Snapclient with soundcard <{soundcard}>.")
+            print(f"Failed to start Squeezelite.")
         return result
 
-    def service_stop(self, soundcard):
+    def service_stop(self):
         expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
-        result = pexpect.spawnu(f"systemctl stop -f snapclient@{soundcard}").expect(expect_list, 4) == 0
+        result = pexpect.spawnu(f"systemctl stop -f squeezelite").expect(expect_list, 4) == 0
         if result:
-            print(f"Successfully stopped Snapclient with soundcard <{soundcard}>.")
+            print(f"Successfully stopped Squeezelite.")
         else:
-            print(f"Failed to stop Snapclient with soundcard <{soundcard}>.")
+            print(f"Failed to stop Squeezelite.")
         return result
 
 
@@ -71,22 +70,3 @@ class SnapserverControll:
             print("Successfully stopped Snapserver.")
         else:
             print("Failed to stop Snapserver.")
-
-
-class SnapcastControll:
-    def __init__(self, mqtt_client, config):
-        self.mqtt_client = mqtt_client
-        self.site_id = config['snips']['device']['site_id']
-        self.room_name = config['snips']['device']['room_name']
-        self.snapclientctl = SnapclientControll()
-        self.snapserverctl = SnapserverControll()
-        self.config = config
-
-    @staticmethod
-    def set_volume(slot_dict):
-        url = f"http:///jsonrpc"
-        headers = {'content-type': 'application/json'}
-        # Example echo method
-        payload = {"id": 8, "jsonrpc": "2.0", "method": "Client.GetStatus", "params": {"id": "b8:27:eb:65:d2:48"}}
-        #response = requests.post(url, data=json.dumps(payload), headers=headers).json()
-        #print(response)
