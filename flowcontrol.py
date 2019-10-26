@@ -61,7 +61,7 @@ class FlowControll:
                 'names_list': names_list,
                 'synonym': synonym,
                 'bluetooth': {'addr': addr,
-                              'is_connected': self.bltctl.bl_helper.is_connected()},
+                              'is_connected': self.bltctl.bl_helper.is_connected(addr)},
                 'soundcard': blt_soundcards[name],
                 'squeezelite_mac': self.get_squeezelite_mac(name)
             }
