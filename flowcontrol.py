@@ -57,7 +57,9 @@ class FlowControll:
             'room_name': self.room_name,
             'site_id': self.site_id,
             'area': self.area,
-            'devices': self.get_device_list()
+            'devices': self.get_device_list(),
+            'default_device': self.config['squeezelite']['default_device'],
+            'auto_pause': self.config['squeezelite']['pause_while_dialogue']
         }
         self.mqtt_client.publish('squeezebox/answer/siteInfo', payload=json.dumps(payload))
 

@@ -29,4 +29,5 @@ version = 1  # Do not delete this line, it's for Git update and setup.sh
 
 [squeezelite]
 
-soundcard = "bluetooth_speaker"
+default_device = "Kombo_22"
+pause_while_dialogue = true
