@@ -99,6 +99,7 @@ class FlowControll:
         self.bltctl.connect_with_block(data['addr'])
         if not self.sqectl.is_active(data['squeeze_mac']):
             self.sqectl.service_start(data['squeeze_mac'], data['soundcard'], data['name'])
+            self.send_site_info()
 
     def msg_disconnected(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
