@@ -16,7 +16,7 @@ class SqueezeliteControll:
         with open("/etc/default/squeezelite", "w") as f:
             name = self.config['snips']['device']['room_name'] + " - " + device_name
             args = [f"-m {squeeze_mac}", f"-o {soundcard}", f"-n \'{name}\'"]
-            f.write('SB_EXTRA_ARGS==\"{args}\"\n'.format(args=" ".join(args)))
+            f.write('SB_EXTRA_ARGS=\"{args}\"\n'.format(args=" ".join(args)))
 
     def service_start(self, squeeze_mac, soundcard, name):
         self.write_environment_file(squeeze_mac, soundcard, name)
