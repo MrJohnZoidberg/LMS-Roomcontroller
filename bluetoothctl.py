@@ -150,7 +150,7 @@ class Bluetooth:
         self.mqtt_client.publish('bluetooth/answer/devicesDiscovered', payload=json.dumps(payload))
         self.send_site_info()
 
-    def thread_connect(self, addr, channel):
+    def thread_connect(self, addr):
         result = self.bl_helper.connect(addr)
         if result:
             if addr not in self.connected_devices:
@@ -165,7 +165,7 @@ class Bluetooth:
             'result': result,
             'addr': addr
         }
-        self.mqtt_client.publish(f'{channel}/answer/deviceConnect', payload=json.dumps(payload))
+        self.mqtt_client.publish(f'bluetooth/answer/deviceConnect', payload=json.dumps(payload))
         self.send_site_info()
 
     def thread_disconnect(self, addr):
@@ -206,15 +206,12 @@ class Bluetooth:
 
     def msg_connect(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        if data.get('channel'):
-            self.connect(data['addr'], data.get('channel'))
-        else:
-            self.connect(data['addr'])
+        self.connect(data['addr'])
 
-    def connect(self, addr, channel='bluetooth'):
+    def connect(self, addr):
         if 'connect' in self.threadobjs:
             del self.threadobjs['connect']
-        self.threadobjs['connect'] = threading.Thread(target=self.thread_connect, args=(addr, channel,))
+        self.threadobjs['connect'] = threading.Thread(target=self.thread_connect, args=(addr,))
         self.threadobjs['connect'].start()
 
     def connect_with_block(self, addr):

@@ -1,4 +1,6 @@
 import json
+import pickle
+import random
 
 
 class FlowControll:
@@ -10,6 +12,30 @@ class FlowControll:
         self.site_id = config['snips']['device']['site_id']
         self.room_name = config['snips']['device']['room_name']
         self.area = config['snips']['device']['area']
+
+    @staticmethod
+    def create_mac():
+        mac = "%02x:%02x:%02x:%02x:%02x:%02x" % (
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255)
+        )
+        return mac
+
+    def get_squeezelite_mac(self, device_name):
+        try:
+            with open(".squeezelite_macs", "rb") as f:
+                macs_dict = pickle.load(f)
+        except FileNotFoundError:
+            macs_dict = dict()
+        if not macs_dict.get(device_name):
+            macs_dict[device_name] = self.create_mac()
+            with open(".squeezelite_macs", "wb") as f:
+                pickle.dump(macs_dict, f)
+        return macs_dict.get(device_name)
 
     def get_device_list(self):
         devices = list()
@@ -34,8 +60,10 @@ class FlowControll:
                 'name': name,
                 'names_list': names_list,
                 'synonym': synonym,
-                'bluetooth': {'addr': addr},
-                'soundcard': blt_soundcards[name]
+                'bluetooth': {'addr': addr,
+                              'is_connected': self.bltctl.bl_helper.is_connected()},
+                'soundcard': blt_soundcards[name],
+                'squeezelite_mac': self.get_squeezelite_mac(name)
             }
             devices.append(device)
 
@@ -66,7 +94,15 @@ class FlowControll:
     def msg_send_site_info(self, client, userdata, msg):
         self.send_site_info()
 
+    def msg_connect(self, client, userdata, msg):
+        data = json.loads(msg.payload.decode("utf-8"))
+        self.bltctl.connect_with_block(data['addr'])
+        if not self.sqectl.is_active(data['squeeze_mac']):
+            self.sqectl.service_start(data['squeeze_mac'], data['soundcard'], data['name'])
+
     def msg_disconnected(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
+        squeeze_mac = [d['squeezelite_mac'] for d in self.get_device_list()
+                       if d.get('bluetooth') and data['addr'] == d['bluetooth']['addr']]
         if data['siteId'] == self.site_id and self.sqectl.is_active():
-            self.sqectl.service_stop()
+            self.sqectl.service_stop(squeeze_mac)
