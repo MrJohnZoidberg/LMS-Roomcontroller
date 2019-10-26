@@ -104,5 +104,5 @@ class FlowControll:
         data = json.loads(msg.payload.decode("utf-8"))
         squeeze_mac = [d['squeezelite_mac'] for d in self.get_device_list()
                        if d.get('bluetooth') and data['addr'] == d['bluetooth']['addr']]
-        if data['siteId'] == self.site_id and self.sqectl.is_active():
+        if data['siteId'] == self.site_id and self.sqectl.is_active(squeeze_mac):
             self.sqectl.service_stop(squeeze_mac)
