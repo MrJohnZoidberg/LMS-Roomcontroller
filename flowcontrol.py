@@ -8,7 +8,6 @@ class FlowControll:
         self.mqtt_client = mqtt_client
         self.config = config
         self.bltctl = bltctl
-        self.bltctl.send_site_info = self.send_site_info
         self.sqectl = sqectl
         self.site_id = config['snips']['device']['site_id']
         self.room_name = config['snips']['device']['room_name']
@@ -97,10 +96,16 @@ class FlowControll:
 
     def msg_connect(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        self.bltctl.connect_with_block(data['addr'])
-        if not self.sqectl.is_active(data['squeeze_mac']):
+        result = self.bltctl.connect_with_block(data['addr'])
+        if result and not self.sqectl.is_active(data['squeeze_mac']):
             self.sqectl.service_start(data['squeeze_mac'], data['soundcard'], data['name'])
             self.send_site_info()
+        payload = {
+            'siteId': self.site_id,
+            'result': result,
+            'addr': data['addr']
+        }
+        self.mqtt_client.publish(f'squeezebox/answer/deviceConnect', payload=json.dumps(payload))
 
     def msg_disconnected(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
@@ -108,3 +113,4 @@ class FlowControll:
                        if d.get('bluetooth') and data['addr'] == d['bluetooth']['addr']][0]
         if data['siteId'] == self.site_id and self.sqectl.is_active(squeeze_mac):
             self.sqectl.service_stop(squeeze_mac)
+        self.send_site_info()
