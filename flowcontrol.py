@@ -8,6 +8,7 @@ class FlowControll:
         self.mqtt_client = mqtt_client
         self.config = config
         self.bltctl = bltctl
+        self.bltctl.send_site_info = self.send_site_info
         self.sqectl = sqectl
         self.site_id = config['snips']['device']['site_id']
         self.room_name = config['snips']['device']['room_name']

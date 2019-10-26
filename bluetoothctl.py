@@ -133,7 +133,7 @@ class Bluetooth:
                 'addr': addr
             }
             self.mqtt_client.publish('bluetooth/answer/deviceDisconnect', payload=json.dumps(payload))
-            self.send_site_info()
+            self.send_blt_info()
 
     def thread_discover(self):
         result = self.bl_helper.start_discover()
@@ -148,7 +148,7 @@ class Bluetooth:
             'siteId': self.site_id
         }
         self.mqtt_client.publish('bluetooth/answer/devicesDiscovered', payload=json.dumps(payload))
-        self.send_site_info()
+        self.send_blt_info()
 
     def thread_connect(self, addr):
         result = self.bl_helper.connect(addr)
@@ -166,7 +166,7 @@ class Bluetooth:
             'addr': addr
         }
         self.mqtt_client.publish(f'bluetooth/answer/deviceConnect', payload=json.dumps(payload))
-        self.send_site_info()
+        self.send_blt_info()
 
     def thread_disconnect(self, addr):
         result = self.bl_helper.disconnect(addr)
@@ -181,7 +181,7 @@ class Bluetooth:
             'addr': addr
         }
         self.mqtt_client.publish('bluetooth/answer/deviceDisconnect', payload=json.dumps(payload))
-        self.send_site_info()
+        self.send_blt_info()
 
     def thread_remove(self, addr):
         result = self.bl_helper.remove(addr)
@@ -196,7 +196,7 @@ class Bluetooth:
             'addr': addr
         }
         self.mqtt_client.publish('bluetooth/answer/deviceRemove', payload=json.dumps(payload))
-        self.send_site_info()
+        self.send_blt_info()
 
     def msg_discover(self, client, userdata, msg):
         if 'discover' in self.threadobjs:
@@ -224,7 +224,7 @@ class Bluetooth:
                 self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
                                                                          args=(addr,))
                 self.threadobjs_wait_disconnect[addr].start()
-        self.send_site_info()
+        self.send_blt_info()
         return result
 
     def msg_disconnect(self, client, userdata, msg):
@@ -241,10 +241,10 @@ class Bluetooth:
         self.threadobjs['remove'] = threading.Thread(target=self.thread_remove, args=(data['addr'],))
         self.threadobjs['remove'].start()
 
-    def msg_send_site_info(self, client, userdata, msg):
-        self.send_site_info()
+    def msg_send_blt_info(self, client, userdata, msg):
+        self.send_blt_info()
 
-    def send_site_info(self):
+    def send_blt_info(self):
         available_devices = self.bl_helper.get_available_devices()
         payload = {
             'room_name': self.room_name,
