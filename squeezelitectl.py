@@ -20,22 +20,20 @@ class SqueezeliteControll:
 
     def service_start(self, squeeze_mac, soundcard, name):
         self.write_environment_file(squeeze_mac, soundcard, name)
-        expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
-        result = pexpect.spawnu(f"systemctl restart -f squeezelite@{squeeze_mac}").expect(expect_list, 4) == 0
+        expect_list = [pexpect.EOF, pexpect.TIMEOUT]
+        result = pexpect.spawnu(f"systemctl start -f squeezelite").expect(expect_list, 4) == 0
         if result:
-            print(f"Successfully started Squeezelite for {squeeze_mac}.")
+            print(f"Successfully started Squeezelite.")
         else:
-            print(f"Failed to start Squeezelite for {squeeze_mac}.")
+            print(f"Failed to start Squeezelite.")
         return result
 
     @staticmethod
-    def service_stop(squeeze_mac):
-        expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
-        result = pexpect.spawnu(f"systemctl stop -f squeezelite@{squeeze_mac}").expect(expect_list, 4) == 0
-        if not result:
-            result = pexpect.spawnu(f"systemctl kill -f squeezelite@{squeeze_mac}").expect(expect_list, 4) == 0
+    def service_stop():
+        expect_list = [pexpect.EOF, pexpect.TIMEOUT]
+        result = pexpect.spawnu(f"systemctl stop -f squeezelite").expect(expect_list, 4) == 0
         if result:
-            print(f"Successfully stopped Squeezelite for {squeeze_mac}.")
+            print(f"Successfully stopped Squeezelite.")
         else:
-            print(f"Failed to stop Squeezelite for {squeeze_mac}.")
+            print(f"Failed to stop Squeezelite.")
         return result
