@@ -23,6 +23,7 @@ def on_connect(client, userdata, flags, rc):
 
     client.message_callback_add(f'squeezebox/request/oneSite/{site_id}/serviceStart', flowctl.msg_service_start)
     client.message_callback_add(f'squeezebox/request/oneSite/{site_id}/serviceStop', flowctl.msg_service_stop)
+    client.message_callback_add(f'squeezebox/request/oneSite/{site_id}/siteInfo', flowctl.msg_send_site_info)
     client.subscribe(f'squeezebox/request/oneSite/{site_id}/#')
 
     client.message_callback_add('squeezebox/request/allSites/siteInfo', flowctl.msg_send_site_info)
