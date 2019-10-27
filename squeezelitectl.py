@@ -8,7 +8,7 @@ class SqueezeliteControll:
 
     @staticmethod
     def is_active(squeeze_mac):
-        expect_list = [r"active \(running\)", r"inactive \(dead\)", "could not be found"]
+        expect_list = [r"active \(running\)", r"inactive \(dead\)", "could not be found", "failed"]
         result = pexpect.spawnu(f"systemctl status squeezelite@{squeeze_mac}").expect(expect_list) == 0
         return result
 
@@ -28,9 +28,12 @@ class SqueezeliteControll:
             print(f"Failed to start Squeezelite.")
         return result
 
-    def service_stop(self, squeeze_mac):
+    @staticmethod
+    def service_stop(squeeze_mac):
         expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
         result = pexpect.spawnu(f"systemctl stop -f squeezelite@{squeeze_mac}").expect(expect_list, 4) == 0
+        if not result:
+            result = pexpect.spawnu(f"systemctl kill -f squeezelite@{squeeze_mac}").expect(expect_list, 4) == 0
         if result:
             print(f"Successfully stopped Squeezelite.")
         else:

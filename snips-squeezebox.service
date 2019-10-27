@@ -1,0 +1,13 @@
+[Unit]
+Description=Snips Bluetooth Squeezelite Controller
+After=network.target multi-user.target
+
+[Service]
+Type=idle
+WorkingDirectory=/home/pi/Snips-Bluetooth-Snapcast
+ExecStart=/home/pi/Snips-Bluetooth-Snapcast/venv/bin/python3 main.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
