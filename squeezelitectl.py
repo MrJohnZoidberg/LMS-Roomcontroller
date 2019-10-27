@@ -12,9 +12,9 @@ class SqueezeliteControll:
         result = pexpect.spawnu(f"systemctl status squeezelite@{squeeze_mac}").expect(expect_list) == 0
         return result
 
-    def write_environment_file(self, squeeze_mac, soundcard, device_name):
+    @staticmethod
+    def write_environment_file(squeeze_mac, soundcard, name):
         with open("/etc/default/squeezelite", "w") as f:
-            name = self.config['snips']['device']['room_name'] + " - " + device_name
             args = [f"-m {squeeze_mac}", f"-o {soundcard}", f"-n \'{name}\'"]
             f.write('SB_EXTRA_ARGS=\"{args}\"\n'.format(args=" ".join(args)))
 
@@ -23,9 +23,9 @@ class SqueezeliteControll:
         expect_list = [pexpect.EOF, r"not loaded", pexpect.TIMEOUT]
         result = pexpect.spawnu(f"systemctl restart -f squeezelite@{squeeze_mac}").expect(expect_list, 4) == 0
         if result:
-            print(f"Successfully started Squeezelite.")
+            print(f"Successfully started Squeezelite for {squeeze_mac}.")
         else:
-            print(f"Failed to start Squeezelite.")
+            print(f"Failed to start Squeezelite for {squeeze_mac}.")
         return result
 
     @staticmethod
@@ -35,7 +35,7 @@ class SqueezeliteControll:
         if not result:
             result = pexpect.spawnu(f"systemctl kill -f squeezelite@{squeeze_mac}").expect(expect_list, 4) == 0
         if result:
-            print(f"Successfully stopped Squeezelite.")
+            print(f"Successfully stopped Squeezelite for {squeeze_mac}.")
         else:
-            print(f"Failed to stop Squeezelite.")
+            print(f"Failed to stop Squeezelite for {squeeze_mac}.")
         return result

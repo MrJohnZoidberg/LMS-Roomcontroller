@@ -96,18 +96,30 @@ class FlowControll:
     def msg_send_site_info(self, client, userdata, msg):
         self.send_site_info()
 
-    def msg_connect(self, client, userdata, msg):
+    def msg_service_start(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        result = self.bltctl.connect_with_block(data['addr'])
-        if result and not self.sqectl.is_active(data['squeeze_mac']):
-            self.sqectl.service_start(data['squeeze_mac'], data['soundcard'], data['name'])
-            self.send_site_info()
+        mac = data['squeeze_mac']
+        if self.sqectl.is_active(mac):
+            result = True
+        else:
+            result = self.sqectl.service_start(mac, data['soundcard'], data['name'])
         payload = {
             'siteId': self.site_id,
-            'result': result,
-            'addr': data['addr']
+            'result': result
         }
-        self.mqtt_client.publish(f'squeezebox/answer/deviceConnect', payload=json.dumps(payload))
+        self.send_site_info()
+        client.publish('squeezebox/answer/serviceStart', payload=json.dumps(payload))
+
+    def msg_service_stop(self, client, userdata, msg):
+        data = json.loads(msg.payload.decode("utf-8"))
+        mac = data['squeeze_mac']
+        result = self.sqectl.service_stop(mac)
+        payload = {
+            'siteId': self.site_id,
+            'result': result
+        }
+        self.send_site_info()
+        client.publish('squeezebox/answer/serviceStop', payload=json.dumps(payload))
 
     def msg_disconnected(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
