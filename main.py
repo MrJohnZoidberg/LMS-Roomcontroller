@@ -21,7 +21,6 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(f'bluetooth/request/oneSite/{site_id}/#')
     client.subscribe('bluetooth/request/allSites/#')
 
-    client.message_callback_add(f'squeezebox/request/oneSite/{site_id}/deviceConnect', bltctl.msg_connect)
     client.message_callback_add(f'squeezebox/request/oneSite/{site_id}/serviceStart', flowctl.msg_service_start)
     client.message_callback_add(f'squeezebox/request/oneSite/{site_id}/serviceStop', flowctl.msg_service_stop)
     client.subscribe(f'squeezebox/request/oneSite/{site_id}/#')

@@ -120,11 +120,3 @@ class FlowControll:
         }
         self.send_site_info()
         client.publish('squeezebox/answer/serviceStop', payload=json.dumps(payload))
-
-    def msg_disconnected(self, client, userdata, msg):
-        data = json.loads(msg.payload.decode("utf-8"))
-        squeeze_mac = [d['squeezelite_mac'] for d in self.device_list
-                       if d.get('bluetooth') and data['addr'] == d['bluetooth']['addr']][0]
-        if data['siteId'] == self.site_id and self.sqectl.is_active(squeeze_mac):
-            self.sqectl.service_stop(squeeze_mac)
-        self.send_site_info()

@@ -150,8 +150,13 @@ class Bluetooth:
         self.mqtt_client.publish('bluetooth/answer/devicesDiscovered', payload=json.dumps(payload))
         self.send_blt_info()
 
-    def thread_connect(self, addr):
+    def thread_connect(self, addr, tries):
         result = self.bl_helper.connect(addr)
+        if not result and tries > 1:
+            for i in range(tries):
+                result = self.bl_helper.connect(addr)
+                if result:
+                    break
         if result:
             if addr not in self.connected_devices:
                 name = [d['name'] for d in self.bl_helper.get_available_devices() if d['mac_address'] == addr][0]
@@ -206,12 +211,15 @@ class Bluetooth:
 
     def msg_connect(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        self.connect(data['addr'])
+        if data.get('tries'):
+            self.connect(data['addr'], int(data['tries']))
+        else:
+            self.connect(data['addr'])
 
-    def connect(self, addr):
+    def connect(self, addr, tries=0):
         if 'connect' in self.threadobjs:
             del self.threadobjs['connect']
-        self.threadobjs['connect'] = threading.Thread(target=self.thread_connect, args=(addr,))
+        self.threadobjs['connect'] = threading.Thread(target=self.thread_connect, args=(addr, tries,))
         self.threadobjs['connect'].start()
 
     def connect_with_block(self, addr):
