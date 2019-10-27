@@ -111,9 +111,7 @@ class FlowControll:
         client.publish('squeezebox/answer/serviceStart', payload=json.dumps(payload))
 
     def msg_service_stop(self, client, userdata, msg):
-        data = json.loads(msg.payload.decode("utf-8"))
-        mac = data['squeeze_mac']
-        result = self.sqectl.service_stop(mac)
+        result = self.sqectl.service_stop()
         payload = {
             'siteId': self.site_id,
             'result': result
