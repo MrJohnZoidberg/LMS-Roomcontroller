@@ -32,6 +32,8 @@ class SqueezeliteControll:
     def service_stop():
         expect_list = [pexpect.EOF, pexpect.TIMEOUT]
         result = pexpect.spawnu(f"systemctl stop -f squeezelite").expect(expect_list, 4) == 0
+        if not result:
+            result = pexpect.spawnu(f"systemctl kill squeezelite").expect(expect_list, 4) == 0
         if result:
             print(f"Successfully stopped Squeezelite.")
         else:
