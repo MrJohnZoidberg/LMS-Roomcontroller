@@ -9,10 +9,6 @@ class FlowControll:
         self.config = config
         self.bltctl = bltctl
         self.sqectl = sqectl
-        self.site_id = config['snips']['device']['site_id']
-        self.room_name = config['snips']['device']['room_name']
-        self.area = config['snips']['device']['area']
-        self.device_list = list()
 
     @staticmethod
     def create_mac():
@@ -40,53 +36,44 @@ class FlowControll:
 
     def get_device_list(self):
         devices = list()
-        blt_soundcards = self.config['bluetooth']['soundcards']
-        blt_synonyms = self.config['bluetooth']['synonyms']
-        # nonblt_soundcards = self.config['squeezelite']['nbsoundcards']
+        device_names = self.config['devices']['names']
+        device_soundcards = self.config['devices']['soundcards']
         available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
 
-        for name in blt_soundcards:
-            names_list = [name]
-            if name in blt_synonyms:
-                synonym = blt_synonyms[name]
-                names_list.append(synonym)
-            else:
-                synonym = None
+        for name in device_names:
+            names_list = [name]  # list with all names from site
+
+            synonyms = device_names[name]
+            if synonyms and isinstance(synonyms, str):
+                names_list.append(synonyms)
+                synonyms = [synonyms]
+            elif synonyms and isinstance(synonyms, list):
+                for synonym in synonyms:
+                    names_list.append(synonym)
+
             addr = [d['mac_address'] for d in available_bluetooth_devices if d['name'] == name]
             if addr:
-                addr = addr[0]
+                bluetooth_info = {'addr': addr[0],
+                                  'is_connected': self.bltctl.bl_helper.is_connected(addr)}
             else:
-                addr = None
+                bluetooth_info = None
+
             device = {
                 'name': name,
                 'names_list': names_list,
-                'synonym': synonym,
-                'bluetooth': {'addr': addr,
-                              'is_connected': self.bltctl.bl_helper.is_connected(addr)},
-                'soundcard': blt_soundcards[name],
+                'synonyms': synonyms,
+                'bluetooth': bluetooth_info,
+                'soundcard': device_soundcards.get(name),
                 'squeezelite_mac': self.get_squeezelite_mac(name)
             }
             devices.append(device)
-
-        """
-        for name in nonblt_soundcards:
-            device = {
-                'name': name,
-                'names_list': [name],
-                'synonym': None,
-                'bluetooth': None,
-                'soundcard': nonblt_soundcards[name]
-            }
-            devices.append(device)
-        """
-        self.device_list = devices
         return devices
 
     def send_site_info(self):
         payload = {
-            'room_name': self.room_name,
-            'site_id': self.site_id,
-            'area': self.area,
+            'room_name': self.config['snips']['site']['room_name'],
+            'site_id': self.config['snips']['site']['site_id'],
+            'area': self.config['snips']['site']['area'],
             'devices': self.get_device_list(),
             'default_device': self.config['squeezelite']['default_device'],
             'auto_pause': self.config['squeezelite']['pause_while_dialogue']
@@ -104,7 +91,7 @@ class FlowControll:
         else:
             result = self.sqectl.service_start(data['server'], mac, data['soundcard'], data['name'])
         payload = {
-            'siteId': self.site_id,
+            'siteId': self.config['snips']['site']['site_id'],
             'result': result
         }
         self.send_site_info()
@@ -113,7 +100,7 @@ class FlowControll:
     def msg_service_stop(self, client, userdata, msg):
         result = self.sqectl.service_stop()
         payload = {
-            'siteId': self.site_id,
+            'siteId': self.config['snips']['site']['site_id'],
             'result': result
         }
         self.send_site_info()

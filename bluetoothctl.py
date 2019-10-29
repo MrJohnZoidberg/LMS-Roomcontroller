@@ -91,21 +91,24 @@ class BluetoothHelper:
     def connect(self, mac_address):
         """Try to connect to a device by mac address."""
         self.process.send(f"connect {mac_address}\n")
-        res = self.process.expect(["Failed to connect", "Connection successful", pexpect.TIMEOUT, pexpect.EOF], 7)
+        expects = ["Failed to connect", "Connection successful", "not available", pexpect.TIMEOUT, pexpect.EOF]
+        res = self.process.expect(expects, 7)
         return res == 1
 
     def is_connected(self, mac_address):
         self.process.send(f"info {mac_address}\n")
-        res = self.process.expect(["Connected: no", "Connected: yes", pexpect.TIMEOUT, pexpect.EOF], 4)
+        expects = ["Connected: no", "Connected: yes", "not available", pexpect.TIMEOUT, pexpect.EOF]
+        res = self.process.expect(expects, 4)
         self.process.expect([r"0;94m", pexpect.TIMEOUT, pexpect.EOF])
         return res == 1 or res == 2
 
     def disconnect(self, mac_address):
         """Try to disconnect to a device by mac address."""
         self.process.send(f"disconnect {mac_address}\n")
-        expects = ["Failed to disconnect", "Connected: no", "Successful disconnected", pexpect.TIMEOUT, pexpect.EOF]
+        expects = ["Failed to disconnect", "not available", "Connected: no",
+                   "Successful disconnected", pexpect.TIMEOUT, pexpect.EOF]
         res = self.process.expect(expects, 6)
-        return res == 1 or res == 2
+        return res == 2 or res == 3
 
 
 class Bluetooth:
@@ -115,9 +118,9 @@ class Bluetooth:
         self.connected_devices = dict()
         self.bl_helper = BluetoothHelper()
         self.mqtt_client = mqtt_client
-        self.site_id = config['snips']['device']['site_id']
-        self.room_name = config['snips']['device']['room_name']
-        self.synonyms = config['bluetooth']['synonyms']
+        self.site_id = config['snips']['site']['site_id']
+        self.room_name = config['snips']['site']['room_name']
+        self.device_names = config['devices']['names']
 
     def thread_wait_until_disconnect(self, addr):
         connected = True
@@ -151,20 +154,23 @@ class Bluetooth:
         self.send_blt_info()
 
     def thread_connect(self, addr, tries):
+
         result = self.bl_helper.connect(addr)
         if not result and tries > 1:
-            for i in range(tries):
+            for i in range(tries-1):
                 result = self.bl_helper.connect(addr)
                 if result:
                     break
+
         if result:
             if addr not in self.connected_devices:
                 name = [d['name'] for d in self.bl_helper.get_available_devices() if d['mac_address'] == addr][0]
                 self.connected_devices[addr] = name
             if addr not in self.threadobjs_wait_disconnect:
-                self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
-                                                                         args=(addr,))
+                thread_obj = threading.Thread(target=self.thread_wait_until_disconnect, args=(addr,))
+                self.threadobjs_wait_disconnect[addr] = thread_obj
                 self.threadobjs_wait_disconnect[addr].start()
+
         payload = {
             'siteId': self.site_id,
             'result': result,
@@ -174,12 +180,14 @@ class Bluetooth:
         self.send_blt_info()
 
     def thread_disconnect(self, addr):
+
         result = self.bl_helper.disconnect(addr)
         if result:
             if addr in self.connected_devices:
                 del self.connected_devices[addr]
             if addr in self.threadobjs_wait_disconnect:
                 del self.threadobjs_wait_disconnect[addr]
+
         payload = {
             'siteId': self.site_id,
             'result': result,
@@ -189,12 +197,14 @@ class Bluetooth:
         self.send_blt_info()
 
     def thread_remove(self, addr):
+
         result = self.bl_helper.remove(addr)
         if result:
             if addr in self.connected_devices:
                 del self.connected_devices[addr]
             if addr in self.threadobjs_wait_disconnect:
                 del self.threadobjs_wait_disconnect[addr]
+
         payload = {
             'siteId': self.site_id,
             'result': result,
@@ -222,19 +232,6 @@ class Bluetooth:
         self.threadobjs['connect'] = threading.Thread(target=self.thread_connect, args=(addr, tries,))
         self.threadobjs['connect'].start()
 
-    def connect_with_block(self, addr):
-        result = self.bl_helper.connect(addr)
-        if result:
-            if addr not in self.connected_devices:
-                name = [d['name'] for d in self.bl_helper.get_available_devices() if d['mac_address'] == addr][0]
-                self.connected_devices[addr] = name
-            if addr not in self.threadobjs_wait_disconnect:
-                self.threadobjs_wait_disconnect[addr] = threading.Thread(target=self.thread_wait_until_disconnect,
-                                                                         args=(addr,))
-                self.threadobjs_wait_disconnect[addr].start()
-        self.send_blt_info()
-        return result
-
     def msg_disconnect(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
         if 'disconnect' in self.threadobjs:
@@ -257,7 +254,7 @@ class Bluetooth:
         payload = {
             'room_name': self.room_name,
             'site_id': self.site_id,
-            'synonyms': self.synonyms,
+            'device_names': self.device_names,
             'available_devices': available_devices,
             'paired_devices': self.bl_helper.get_paired_devices(),
             'connected_devices': [d for d in available_devices if d['mac_address'] in self.connected_devices]
