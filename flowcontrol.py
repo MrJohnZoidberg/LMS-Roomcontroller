@@ -50,6 +50,8 @@ class FlowControll:
             elif synonyms and isinstance(synonyms, list):
                 for synonym in synonyms:
                     names_list.append(synonym)
+            else:
+                synonyms = None
 
             addr = [d['mac_address'] for d in available_bluetooth_devices if d['name'] == name]
             if addr:
