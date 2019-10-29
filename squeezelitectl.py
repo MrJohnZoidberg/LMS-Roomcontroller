@@ -2,10 +2,6 @@ import pexpect
 
 
 class SqueezeliteControll:
-    def __init__(self, config):
-        self.config = config
-        pass
-
     @staticmethod
     def is_active(squeeze_mac):
         expect_list = [r"active \(running\)", r"inactive \(dead\)", "could not be found", "failed"]
@@ -13,13 +9,18 @@ class SqueezeliteControll:
         return result
 
     @staticmethod
-    def write_environment_file(server, squeeze_mac, soundcard, name):
+    def write_environment_file(server, squeeze_mac, soundcard, name, timeout):
         with open("/etc/default/squeezelite", "w") as f:
-            args = [f"-s {server} -m {squeeze_mac}", f"-o {soundcard}", f"-n {name.replace(' ', '')}"]
+            args = [
+                f"-s {server} -m {squeeze_mac}",
+                f"-o {soundcard}",
+                f"-C {timeout}",
+                f"-n {name.replace(' ', '')}",
+            ]
             f.write('SB_EXTRA_ARGS=\"{args}\"\n'.format(args=" ".join(args)))
 
-    def service_start(self, server, squeeze_mac, soundcard, name):
-        self.write_environment_file(server, squeeze_mac, soundcard, name)
+    def service_start(self, server, squeeze_mac, soundcard, name, timeout):
+        self.write_environment_file(server, squeeze_mac, soundcard, name, timeout)
         expect_list = [r"Failed to start squeezelite.service", pexpect.EOF, pexpect.TIMEOUT]
         result = pexpect.spawnu(f"systemctl start -f squeezelite").expect(expect_list, 4) == 1
         if result:

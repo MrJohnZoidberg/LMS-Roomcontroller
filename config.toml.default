@@ -30,6 +30,7 @@
 
 default_device = "Kombo_22"
 pause_while_dialogue = true
+close_output_after_seconds = 600
 
 [static]
 
