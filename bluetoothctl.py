@@ -99,6 +99,7 @@ class BluetoothHelper:
         self.process.send(f"info {mac_address}\n")
         expects = ["Connected: no", "Connected: yes", "not available", pexpect.TIMEOUT, pexpect.EOF]
         res = self.process.expect(expects, 4)
+        print(res)
         self.process.expect([r"0;94m", pexpect.TIMEOUT, pexpect.EOF])
         return res == 1
 
