@@ -85,13 +85,13 @@ class BluetoothHelper:
     def remove(self, mac_address):
         """Remove paired device by mac address, return success of the operation."""
         self.process.send(f"remove {mac_address}\n")
-        res = self.process.expect(["not available", "Device has been removed", pexpect.EOF, pexpect.TIMEOUT], 6)
+        res = self.process.expect(["not available", "Device has been removed", pexpect.EOF, pexpect.TIMEOUT], 7)
         return res == 1
 
     def connect(self, mac_address):
         """Try to connect to a device by mac address."""
         self.process.send(f"connect {mac_address}\n")
-        res = self.process.expect(["Failed to connect", "Connection successful", pexpect.TIMEOUT, pexpect.EOF], 6)
+        res = self.process.expect(["Failed to connect", "Connection successful", pexpect.TIMEOUT, pexpect.EOF], 7)
         return res == 1
 
     def is_connected(self, mac_address):
