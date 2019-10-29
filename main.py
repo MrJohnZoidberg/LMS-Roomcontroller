@@ -43,7 +43,7 @@ if __name__ == "__main__":
     mqtt_client = mqtt.Client()
 
     bltctl = bluetoothctl.Bluetooth(mqtt_client, config)
-    sqectl = squeezelitectl.SqueezeliteControll(config)
+    sqectl = squeezelitectl.SqueezeliteControll()
     flowctl = flowcontrol.FlowControll(mqtt_client, config, bltctl, sqectl)
 
     mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
