@@ -98,7 +98,8 @@ class FlowControll:
         if self.sqectl.is_active(mac):
             result = True
         else:
-            result = self.sqectl.service_start(data['server'], mac, data['soundcard'], data['name'])
+            timeout = int(self.config['squeezelite']['close_output_after_seconds'])
+            result = self.sqectl.service_start(data['server'], mac, data['soundcard'], data['name'], timeout)
         payload = {
             'siteId': self.config['snips']['site']['site_id'],
             'result': result
