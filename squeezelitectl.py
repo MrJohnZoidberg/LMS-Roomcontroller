@@ -13,13 +13,13 @@ class SqueezeliteControll:
         return result
 
     @staticmethod
-    def write_environment_file(squeeze_mac, soundcard, name):
+    def write_environment_file(server, squeeze_mac, soundcard, name):
         with open("/etc/default/squeezelite", "w") as f:
-            args = [f"-m {squeeze_mac}", f"-o {soundcard}", f"-n \'{name}\'"]
+            args = [f"-s {server} -m {squeeze_mac}", f"-o {soundcard}", f"-n {name.replace(' ', '')}"]
             f.write('SB_EXTRA_ARGS=\"{args}\"\n'.format(args=" ".join(args)))
 
-    def service_start(self, squeeze_mac, soundcard, name):
-        self.write_environment_file(squeeze_mac, soundcard, name)
+    def service_start(self, server, squeeze_mac, soundcard, name):
+        self.write_environment_file(server, squeeze_mac, soundcard, name)
         expect_list = [pexpect.EOF, pexpect.TIMEOUT]
         result = pexpect.spawnu(f"systemctl start -f squeezelite").expect(expect_list, 4) == 0
         if result:

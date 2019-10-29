@@ -102,7 +102,7 @@ class FlowControll:
         if self.sqectl.is_active(mac):
             result = True
         else:
-            result = self.sqectl.service_start(mac, data['soundcard'], data['name'])
+            result = self.sqectl.service_start(data['server'], mac, data['soundcard'], data['name'])
         payload = {
             'siteId': self.site_id,
             'result': result
