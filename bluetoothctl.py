@@ -96,9 +96,9 @@ class BluetoothHelper:
 
     def is_connected(self, mac_address):
         self.process.send(f"info {mac_address}\n")
-        res = self.process.expect(["Connected: no", "Connected: yes", pexpect.TIMEOUT, pexpect.EOF], 3)
+        res = self.process.expect(["Connected: no", "Connected: yes", pexpect.TIMEOUT, pexpect.EOF], 4)
         self.process.expect([r"0;94m", pexpect.TIMEOUT, pexpect.EOF])
-        return res == 1
+        return res == 1 or res == 2
 
     def disconnect(self, mac_address):
         """Try to disconnect to a device by mac address."""
