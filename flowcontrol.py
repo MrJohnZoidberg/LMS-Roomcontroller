@@ -1,6 +1,8 @@
 import json
 import pickle
 import random
+import threading
+import time
 
 
 class FlowControll:
@@ -85,6 +87,11 @@ class FlowControll:
     def msg_send_site_info(self, client, userdata, msg):
         self.send_site_info()
 
+    @staticmethod
+    def thread_wait_few_seconds(client, payload):
+        time.sleep(2)
+        client.publish('squeezebox/answer/serviceStart', payload=json.dumps(payload))
+
     def msg_service_start(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
         mac = data['squeeze_mac']
@@ -97,7 +104,7 @@ class FlowControll:
             'result': result
         }
         self.send_site_info()
-        client.publish('squeezebox/answer/serviceStart', payload=json.dumps(payload))
+        threading.Thread(target=self.thread_wait_few_seconds, args=(client, payload,)).start()
 
     def msg_service_stop(self, client, userdata, msg):
         result = self.sqectl.service_stop()
