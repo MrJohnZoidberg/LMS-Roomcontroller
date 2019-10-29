@@ -56,7 +56,7 @@ class FlowControll:
             addr = [d['mac_address'] for d in available_bluetooth_devices if d['name'] == name]
             if addr:
                 bluetooth_info = {'addr': addr[0],
-                                  'is_connected': self.bltctl.bl_helper.is_connected(addr)}
+                                  'is_connected': self.bltctl.bl_helper.is_connected(addr[0])}
             else:
                 bluetooth_info = None
 
