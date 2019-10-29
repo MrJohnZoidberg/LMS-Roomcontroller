@@ -1,6 +1,5 @@
 # This is the configuration file for the Bluetooth- and Squeezelite-Controller.
 # You can adjust all values after the "=" according to your wishes.
-version = 1  # Do not delete this line, it's for Git update and setup.sh
 
 [snips]
 
@@ -9,25 +8,28 @@ version = 1  # Do not delete this line, it's for Git update and setup.sh
     # mqtt_username = ""
     # mqtt_password = ""
 
-    [snips.device]
+    [snips.site]
     site_id = "default"
     room_name = "Wohnzimmer"
     area = "unten"
 
-[bluetooth]
+[devices]
 
-    [bluetooth.soundcards]
-    # The bluetooth soundcard for a bluetooth device
-    # "<bluetooth_device_name>" = "<soundcard_name>"
+    [devices.names]
+    # "<device_name>" = "<synonym>" or ["<synonym1>", "<synonym2>", ...]
+    "Kombo_22" = ["Verstärker", "Radio"]
+    "MDR-1000X" = "Kopfhörer"
+
+    [devices.soundcards]
+    # "<device_name>" = "<soundcard_name>"
     "Kombo_22" = "bluetooth_speaker"
     "MDR-1000X" = "bluetooth_headphone"
-
-    [bluetooth.synonyms]
-    # A pronounceable synonym of a bluetooth device from bluetooth.soundcards
-    "Kombo_22" = "Verstärker"
-    "MDR-1000X" = "Kopfhörer"
 
 [squeezelite]
 
 default_device = "Kombo_22"
 pause_while_dialogue = true
+
+[static]
+
+config_ver=0.1  # Do not delete this line, it's for setup.sh
