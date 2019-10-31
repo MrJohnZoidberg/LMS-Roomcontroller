@@ -10,6 +10,7 @@ class SqueezeliteControll:
 
     @staticmethod
     def write_environment_file(server, squeeze_mac, soundcard, name, timeout):
+        # TODO: Do not use the default environment file, create a new file here instead
         with open("/etc/default/squeezelite", "w") as f:
             args = [
                 f"-s {server} -m {squeeze_mac}",
