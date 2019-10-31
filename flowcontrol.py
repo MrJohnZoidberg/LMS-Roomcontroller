@@ -60,7 +60,7 @@ class FlowControll:
                 bluetooth_info = {'addr': addr[0],
                                   'is_connected': self.bltctl.bl_helper.is_connected(addr[0])}
             else:
-                bluetooth_info = None
+                bluetooth_info = dict()
 
             device = {
                 'name': name,
