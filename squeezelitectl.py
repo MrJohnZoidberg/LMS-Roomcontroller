@@ -15,9 +15,10 @@ class SqueezeliteControll:
             args = [
                 f"-s {server} -m {squeeze_mac}",
                 f"-o {soundcard}",
-                f"-C {timeout}",
                 f"-n \'{name}\'",
             ]
+            if timeout:
+                args.append(f"-C {timeout}")
             f.write('SB_EXTRA_ARGS=\"{args}\"\n'.format(args=" ".join(args)))
 
     def service_start(self, server, squeeze_mac, soundcard, name, timeout):

@@ -94,13 +94,15 @@ class FlowControll:
 
     def msg_service_start(self, client, userdata, msg):
         data = json.loads(msg.payload.decode("utf-8"))
-        timeout = int(self.config['squeezelite']['close_output_after_seconds'])
+        timeout = self.config['devices']['timeouts'].get(data['device_name'])
+        if timeout:
+            timeout = int(timeout)
         result = self.sqectl.service_start(
             data['server'],
             data['squeeze_mac'],
             data['soundcard'],
-            data['name'],
-            timeout
+            data['player_name'],
+            timeout,
         )
         payload = {
             'siteId': self.config['snips']['site']['site_id'],

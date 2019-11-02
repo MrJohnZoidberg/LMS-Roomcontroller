@@ -26,12 +26,15 @@
     "Kombo_22" = "bluetooth_speaker"
     "MDR-1000X" = "bluetooth_headphone"
 
+    [devices.timeouts]
+    # "<device_name" = <timeout in seconds>
+    "Kombo_22" = 60
+
 [squeezelite]
 
 default_device = "Kombo_22"
 pause_while_dialogue = true
-close_output_after_seconds = 600
 
 [static]
 
-config_ver=0.1  # Do not delete this line, it's for setup.sh
+config_ver=0.2  # Do not delete this line, it's for setup.sh
