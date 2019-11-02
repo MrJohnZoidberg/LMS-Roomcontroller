@@ -37,4 +37,4 @@ pause_while_dialogue = true
 
 [static]
 
-config_ver=0.2  # Do not delete this line, it's for setup.sh
+config_ver=0.2
