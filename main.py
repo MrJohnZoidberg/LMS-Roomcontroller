@@ -32,7 +32,7 @@ def on_connect(client, userdata, flags, rc):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG)
+    logging.basicConfig(filename='.controller.log', filemode='w', level=logging.DEBUG)
 
     config = toml.load('config.toml')
     if 'mqtt' in config['snips']['common']:
