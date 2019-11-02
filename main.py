@@ -5,6 +5,7 @@ import paho.mqtt.client as mqtt
 import bluetoothctl
 import squeezelitectl
 import flowcontrol
+import logging
 
 MQTT_BROKER_ADDRESS = "localhost:1883"
 MQTT_USERNAME = None
@@ -31,6 +32,8 @@ def on_connect(client, userdata, flags, rc):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG)
+
     config = toml.load('config.toml')
     if 'mqtt' in config['snips']['common']:
         MQTT_BROKER_ADDRESS = config['snips']['common']['mqtt']
@@ -49,6 +52,7 @@ if __name__ == "__main__":
     mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER_ADDRESS.split(":")[0], int(MQTT_BROKER_ADDRESS.split(":")[1]))
+    logging.info(f"Connected to MQTT broker with address {MQTT_BROKER_ADDRESS}")
 
     bltctl.send_blt_info()
     flowctl.send_site_info()
