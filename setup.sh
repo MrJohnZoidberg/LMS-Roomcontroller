@@ -41,4 +41,4 @@ else
     echo "Cannot find Python 3. Please install it."
 fi
 
-# TODO: Install dependencies like squeezelite
+# TODO: Install dependencies like squeezelite and copy systemd files

@@ -1,4 +1,4 @@
-# Snips-Bluetooth-Snapcast
+# Squeezelite-Controller
 
 pulseaudio-module-bluetooth has many dependecies!
 
