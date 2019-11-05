@@ -10,7 +10,8 @@ MQTT_USERNAME = None
 MQTT_PASSWORD = None
 
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(*args):
+    client = args[0]
     client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/devicesDiscover', flowctl.bltctl.msg_discover)
     client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceConnect', flowctl.bltctl.msg_connect)
     client.message_callback_add(f'bluetooth/request/oneSite/{site_id}/deviceDisconnect', flowctl.bltctl.msg_disconnect)

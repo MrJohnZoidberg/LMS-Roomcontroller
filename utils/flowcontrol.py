@@ -10,9 +10,9 @@ class FlowControll:
     def __init__(self, mqtt_client, config):
         self.mqtt_client = mqtt_client
         self.config = config
-        self.bltctl = bluetoothctl.Bluetooth(mqtt_client, config)
+        self.bltctl = bluetoothctl.Bluetooth(self.mqtt_client, self.config)
         self.sqectl = squeezelitectl.SqueezeliteControll()
-        self.send_site_info()
+        self.msg_send_site_info(self.mqtt_client)
 
     @staticmethod
     def create_mac():
@@ -75,7 +75,8 @@ class FlowControll:
             devices.append(device)
         return devices
 
-    def send_site_info(self):
+    def msg_send_site_info(self, *args):
+        client = args[0]
         payload = {
             'room_name': self.config['snips']['site']['room_name'],
             'site_id': self.config['snips']['site']['site_id'],
@@ -84,18 +85,15 @@ class FlowControll:
             'default_device': self.config['squeezelite']['default_device'],
             'auto_pause': self.config['squeezelite']['pause_while_dialogue']
         }
-        self.mqtt_client.publish('squeezebox/answer/siteInfo', payload=json.dumps(payload))
-
-    def msg_send_site_info(self, client, userdata, msg):
-        self.send_site_info()
+        client.publish('squeezebox/answer/siteInfo', payload=json.dumps(payload))
 
     @staticmethod
     def thread_wait_few_seconds(client, payload):
         time.sleep(4)
         client.publish('squeezebox/answer/serviceStart', payload=json.dumps(payload))
 
-    def msg_service_start(self, client, userdata, msg):
-        data = json.loads(msg.payload.decode("utf-8"))
+    def msg_service_start(self, *args):
+        data = json.loads(args[2].payload.decode("utf-8"))
         timeout = self.config['devices']['timeouts'].get(data['device_name'])
         if timeout:
             timeout = int(timeout)
@@ -110,14 +108,15 @@ class FlowControll:
             'siteId': self.config['snips']['site']['site_id'],
             'result': result
         }
-        self.send_site_info()
-        threading.Thread(target=self.thread_wait_few_seconds, args=(client, payload,)).start()
+        self.msg_send_site_info(args[0])
+        threading.Thread(target=self.thread_wait_few_seconds, args=(args[0], payload,)).start()
 
-    def msg_service_stop(self, client, userdata, msg):
+    def msg_service_stop(self, *args):
+        client = args[0]
         result = self.sqectl.service_stop()
         payload = {
             'siteId': self.config['snips']['site']['site_id'],
             'result': result
         }
-        self.send_site_info()
+        self.msg_send_site_info(client)
         client.publish('squeezebox/answer/serviceStop', payload=json.dumps(payload))
