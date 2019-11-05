@@ -3,14 +3,16 @@ import pickle
 import random
 import threading
 import time
+from . import bluetoothctl, squeezelitectl
 
 
 class FlowControll:
-    def __init__(self, mqtt_client, config, bltctl, sqectl):
+    def __init__(self, mqtt_client, config):
         self.mqtt_client = mqtt_client
         self.config = config
-        self.bltctl = bltctl
-        self.sqectl = sqectl
+        self.bltctl = bluetoothctl.Bluetooth(mqtt_client, config)
+        self.sqectl = squeezelitectl.SqueezeliteControll()
+        self.send_site_info()
 
     @staticmethod
     def create_mac():

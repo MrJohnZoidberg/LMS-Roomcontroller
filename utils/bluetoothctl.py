@@ -121,6 +121,7 @@ class Bluetooth:
         self.site_id = config['snips']['site']['site_id']
         self.room_name = config['snips']['site']['room_name']
         self.device_names = config['devices']['names']
+        self.send_blt_info()
 
     def thread_wait_until_disconnect(self, addr):
         connected = True
