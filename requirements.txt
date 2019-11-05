@@ -2,5 +2,3 @@ toml
 paho-mqtt
 pexpect
 requests
-json-rpc
-python-mpd2
