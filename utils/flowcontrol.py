@@ -26,28 +26,31 @@ class FlowControll:
         )
         return mac
 
-    def get_squeezelite_mac(self, device_name):
+    def get_squeezelite_mac(self, device_name, devices_macs):
         try:
             with open(".squeezelite_macs", "rb") as f:
-                macs_dict = pickle.load(f)
+                macs_file_dict = pickle.load(f)
         except FileNotFoundError:
-            macs_dict = dict()
-        if not macs_dict.get(device_name):
-            macs_dict[device_name] = self.create_mac()
-            with open(".squeezelite_macs", "wb") as f:
-                pickle.dump(macs_dict, f)
-        return macs_dict.get(device_name)
+            macs_file_dict = dict()
+        if not devices_macs.get(device_name):
+            macs_file_dict[device_name] = self.create_mac()
+        else:
+            macs_file_dict[device_name] = devices_macs.get(device_name)
+        with open(".squeezelite_macs", "wb") as f:
+            pickle.dump(macs_file_dict, f)
+        return macs_file_dict.get(device_name)
 
     def get_device_list(self):
         devices = list()
-        device_names = self.config['devices']['names']
-        device_soundcards = self.config['devices']['soundcards']
+        devices_names = self.config['devices']['names']
+        devices_soundcards = self.config['devices']['soundcards']
+        devices_macs = self.config['devices']['macs']
         available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
 
-        for name in device_names:
+        for name in devices_names:
             names_list = [name]  # list with all names from site
 
-            synonyms = device_names[name]
+            synonyms = devices_names[name]
             if synonyms and isinstance(synonyms, str):
                 names_list.append(synonyms)
                 synonyms = [synonyms]
@@ -69,8 +72,8 @@ class FlowControll:
                 'names_list': names_list,
                 'synonyms': synonyms,
                 'bluetooth': bluetooth_info,
-                'soundcard': device_soundcards.get(name),
-                'squeezelite_mac': self.get_squeezelite_mac(name)
+                'soundcard': devices_soundcards.get(name),
+                'squeezelite_mac': self.get_squeezelite_mac(name, devices_macs)
             }
             devices.append(device)
         return devices

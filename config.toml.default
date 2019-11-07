@@ -20,6 +20,7 @@
     # "<device_name>" = ["<synonym1>", "<synonym2>", ...]
     "Kombo_22" = ["Verstärker", "Radio"]
     "MDR-1000X" = "Kopfhörer"
+    "SB Player" = ["Handy", "Smartphone"]
 
     [devices.soundcards]
     # "<device_name>" = "<soundcard_name>"
@@ -29,6 +30,9 @@
     [devices.timeouts]
     # "<device_name" = <timeout in seconds>
     "Kombo_22" = 60
+
+    [devices.macs]
+    "SB Player" = "1e:f8:3d:04:e0:c4"
 
 [squeezelite]
 
