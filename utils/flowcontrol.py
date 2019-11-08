@@ -14,6 +14,10 @@ class FlowControll:
         self.bltctl = bluetoothctl.Bluetooth(self.mqtt_client, self.config)
         self.sqectl = squeezelitectl.SqueezeliteControll()
         self.msg_send_site_info(self.mqtt_client)
+        self.player_macs_dict = self.get_player_macs()
+        self.devices_conf = self.config['devices']
+        self.devices_names = {item: self.devices_conf[item] for item in self.devices_conf
+                              if not isinstance(self.devices_conf[item], dict)}
 
     @staticmethod
     def create_mac():
@@ -27,7 +31,7 @@ class FlowControll:
         )
         return mac
 
-    def get_squeezelite_mac(self, device_name, devices_macs):
+    def get_player_macs(self):
         try:
             with open(".player_macs", "rb") as f:
                 macs_file_dict = pickle.load(f)
@@ -35,33 +39,31 @@ class FlowControll:
             macs_file_dict = dict()
         macs_file_dict_copy = macs_file_dict.copy()
 
-        if devices_macs.get(device_name):
-            macs_file_dict[device_name] = devices_macs.get(device_name)
-            logging.debug(f"Took MAC for {device_name} from config: {macs_file_dict[device_name]}")
-        elif macs_file_dict.get(device_name):
-            logging.debug(f"Took stored MAC for {device_name}: {macs_file_dict[device_name]}")
-        else:
-            macs_file_dict[device_name] = self.create_mac()
-            logging.debug(f"Created a new random MAC for {device_name}: {macs_file_dict[device_name]}")
+        devices_macs = self.devices_conf['macs']
+        for device_name in self.devices_names:
+            if devices_macs.get(device_name):
+                macs_file_dict[device_name] = devices_macs.get(device_name)
+                logging.debug(f"Took MAC for {device_name} from config: {macs_file_dict[device_name]}")
+            elif macs_file_dict.get(device_name):
+                logging.debug(f"Took stored MAC for {device_name}: {macs_file_dict[device_name]}")
+            else:
+                macs_file_dict[device_name] = self.create_mac()
+                logging.debug(f"Created a new random MAC for {device_name}: {macs_file_dict[device_name]}")
 
         if macs_file_dict != macs_file_dict_copy:
             with open(".player_macs", "wb") as f:
                 pickle.dump(macs_file_dict, f)
-        return macs_file_dict.get(device_name)
+        return macs_file_dict
 
     def get_device_list(self):
         devices = list()
-        devices_conf = self.config['devices']
-        devices_names = {item: devices_conf[item] for item in devices_conf
-                         if not isinstance(devices_conf[item], dict)}
-        devices_soundcards = devices_conf['soundcards']
-        devices_macs = devices_conf['macs']
+        devices_soundcards = self.devices_conf['soundcards']
         available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
 
-        for name in devices_names:
+        for name in self.devices_names:
             names_list = [name]  # list with all names from site
 
-            synonyms = devices_names[name]
+            synonyms = self.devices_names[name]
             if synonyms and isinstance(synonyms, str):
                 names_list.append(synonyms)
                 synonyms = [synonyms]
@@ -84,7 +86,7 @@ class FlowControll:
                 'synonyms': synonyms,
                 'bluetooth': bluetooth_info,
                 'soundcard': devices_soundcards.get(name),
-                'squeezelite_mac': self.get_squeezelite_mac(name, devices_macs)
+                'squeezelite_mac': self.player_macs_dict.get(name)
             }
             devices.append(device)
         return devices
