@@ -88,4 +88,4 @@ sudo systemctl daemon-reload
 sudo systemctl kill -f squeezelite
 sudo systemctl disable squeezelite
 sudo systemctl enable -f lms-roomcontroller
-sudo systemctl start lms-roomcontroller
+sudo systemctl restart lms-roomcontroller
