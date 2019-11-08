@@ -43,7 +43,8 @@ class FlowControll:
     def get_device_list(self):
         devices = list()
         devices_conf = self.config['devices']
-        devices_names = [item for item in devices_conf if not isinstance(devices_conf[item], dict)]
+        devices_names = {item: devices_conf[item] for item in devices_conf
+                         if not isinstance(devices_conf[item], dict)}
         devices_soundcards = devices_conf['soundcards']
         devices_macs = devices_conf['macs']
         available_bluetooth_devices = self.bltctl.bl_helper.get_available_devices()
