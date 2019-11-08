@@ -36,7 +36,7 @@ class FlowControll:
             macs_file_dict[device_name] = self.create_mac()
         else:
             macs_file_dict[device_name] = devices_macs.get(device_name)
-        with open(".squeezelite_macs", "wb") as f:
+        with open(".player_macs", "wb") as f:
             pickle.dump(macs_file_dict, f)
         return macs_file_dict.get(device_name)
 
