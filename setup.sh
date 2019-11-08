@@ -1,7 +1,9 @@
 #!/bin/bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 DEFAULT_CONFIG_FILE="./config.toml.default"
 CONFIG_FILE="./config.toml"
+SQUEEZELITE_ENV_FILE=".squeezelite.env"
 
 if [ "$EUID" -ne 0 ]
     then echo "Please run as root - Exiting..."
@@ -46,8 +48,6 @@ else
     echo "Cannot find Python 3. Please install it."
 fi
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
 LMS_SERVICE="
 [Unit]
 Description=LMS-Roomcontroller
@@ -56,7 +56,7 @@ After=network.target multi-user.target
 [Service]
 Type=idle
 WorkingDirectory=$DIR
-ExecStart=$DIR/venv/bin/python3 main.py
+ExecStart=$DIR/venv/bin/python3 lms-roomcontroller.py
 Restart=on-failure
 RestartSec=5
 
@@ -73,7 +73,7 @@ After=network.target sound.target
 Nice=-10
 LimitRTPRIO=98
 PIDFile=/run/squeezelite.pid
-EnvironmentFile=-/etc/default/squeezelite
+EnvironmentFile=-$DIR/$SQUEEZELITE_ENV_FILE
 ExecStart=/usr/bin/squeezelite $SB_EXTRA_ARGS
 
 [Install]
@@ -82,3 +82,8 @@ WantedBy=multi-user.target
 
 echo "$LMS_SERVICE" | tee /lib/systemd/system/lms-roomcontroller.service
 echo "$SQUEEZELITE_SERVICE" | tee /lib/systemd/system/squeezelite-custom.service
+systemctl daemon-reload
+systemctl kill -f squeezelite
+systemctl disable squeezelite
+systemctl enable -f lms-roomcontroller
+systemctl start lms-roomcontroller
