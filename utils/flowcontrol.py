@@ -22,12 +22,8 @@ class FlowControll:
     @staticmethod
     def create_mac():
         mac = "%02x:%02x:%02x:%02x:%02x:%02x" % (
-            random.randint(0, 255),
-            random.randint(0, 255),
-            random.randint(0, 255),
-            random.randint(0, 255),
-            random.randint(0, 255),
-            random.randint(0, 255)
+            random.randint(0, 255), random.randint(0, 255), random.randint(0, 255),
+            random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
         )
         return mac
 
