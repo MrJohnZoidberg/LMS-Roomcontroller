@@ -3,6 +3,11 @@
 DEFAULT_CONFIG_FILE="./config.toml.default"
 CONFIG_FILE="./config.toml"
 
+if [ "$EUID" -ne 0 ]
+    then echo "Please run as root - Exiting..."
+    exit 1
+fi
+
 # user config version checking
 if [ ! -e $CONFIG_FILE ]; then
     cp $DEFAULT_CONFIG_FILE $CONFIG_FILE
@@ -41,4 +46,39 @@ else
     echo "Cannot find Python 3. Please install it."
 fi
 
-# TODO: Install dependencies like squeezelite and copy systemd files
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+LMS_SERVICE="
+[Unit]
+Description=LMS-Roomcontroller
+After=network.target multi-user.target
+
+[Service]
+Type=idle
+WorkingDirectory=$DIR
+ExecStart=$DIR/venv/bin/python3 main.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+"
+
+SQUEEZELITE_SERVICE="
+[Unit]
+Description=Squeezelite Player
+After=network.target sound.target
+
+[Service]
+Nice=-10
+LimitRTPRIO=98
+PIDFile=/run/squeezelite.pid
+EnvironmentFile=-/etc/default/squeezelite
+ExecStart=/usr/bin/squeezelite $SB_EXTRA_ARGS
+
+[Install]
+WantedBy=multi-user.target
+"
+
+echo "$LMS_SERVICE" | tee /lib/systemd/system/lms-roomcontroller.service
+echo "$SQUEEZELITE_SERVICE" | tee /lib/systemd/system/squeezelite-custom.service
