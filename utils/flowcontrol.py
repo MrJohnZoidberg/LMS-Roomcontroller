@@ -33,6 +33,7 @@ class FlowControll:
                 macs_file_dict = pickle.load(f)
         except (FileNotFoundError, EOFError, pickle.UnpicklingError):
             macs_file_dict = dict()
+        macs_file_dict_copy = macs_file_dict.copy()
 
         if devices_macs.get(device_name):
             macs_file_dict[device_name] = devices_macs.get(device_name)
@@ -43,8 +44,9 @@ class FlowControll:
             macs_file_dict[device_name] = self.create_mac()
             logging.debug(f"Created a new random MAC for {device_name}: {macs_file_dict[device_name]}")
 
-        with open(".player_macs", "wb") as f:
-            pickle.dump(macs_file_dict, f)
+        if macs_file_dict != macs_file_dict_copy:
+            with open(".player_macs", "wb") as f:
+                pickle.dump(macs_file_dict, f)
         return macs_file_dict.get(device_name)
 
     def get_device_list(self):
