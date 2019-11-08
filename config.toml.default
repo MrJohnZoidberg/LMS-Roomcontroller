@@ -15,12 +15,11 @@
 
 [devices]
 
-    [devices.names]
-    # "<device_name>" = "<synonym>" or
-    # "<device_name>" = ["<synonym1>", "<synonym2>", ...]
-    "Kombo_22" = ["Verstärker", "Radio"]
-    "MDR-1000X" = "Kopfhörer"
-    "SB Player" = ["Handy", "Smartphone"]
+# "<device_name>" = "<synonym>" or
+# "<device_name>" = ["<synonym1>", "<synonym2>", ...]
+"Kombo_22" = ["Verstärker", "Radio"]
+"MDR-1000X" = "Kopfhörer"
+"SB Player" = ["Handy", "Smartphone"]
 
     [devices.soundcards]
     # "<device_name>" = "<soundcard_name>"
