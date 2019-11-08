@@ -6,7 +6,8 @@ CONFIG_FILE="./config.toml"
 SQUEEZELITE_ENV_FILE=".squeezelite.env"
 
 if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root - Exiting..."
+    echo "Please run as root (sudo ./setup.sh)"
+    echo "Exiting..."
     exit 1
 fi
 
