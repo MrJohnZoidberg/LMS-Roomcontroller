@@ -120,7 +120,7 @@ class Bluetooth:
         self.mqtt_client = mqtt_client
         self.site_id = config['snips']['site']['site_id']
         self.room_name = config['snips']['site']['room_name']
-        self.device_names = config['devices']['names']
+        self.devices_names = [item for item in config['devices'] if not isinstance(config['devices'][item], dict)]
         self.send_blt_info()
 
     def thread_wait_until_disconnect(self, addr):
