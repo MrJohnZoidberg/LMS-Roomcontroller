@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 DEFAULT_CONFIG_FILE="./config.toml.default"
 CONFIG_FILE="./config.toml"
-SQUEEZELITE_ENV_FILE=".squeezelite.env"
+SQUEEZELITE_ENV_FILE=".squeezelite_env"
 
 # user config version checking
 if [ ! -e $CONFIG_FILE ]; then
