@@ -11,7 +11,7 @@ class SqueezeliteControll:
 
     @staticmethod
     def write_environment_file(server, squeeze_mac, soundcard, name, timeout):
-        with open("./squeezelite_env", "w") as f:
+        with open("./.squeezelite_env", "w") as f:
             args = [
                 f"-s {server} -m {squeeze_mac}",
                 f"-o {soundcard}",
