@@ -76,7 +76,7 @@ Nice=-10
 LimitRTPRIO=98
 PIDFile=/run/squeezelite.pid
 EnvironmentFile=-$DIR/$SQUEEZELITE_ENV_FILE
-ExecStart=/usr/bin/squeezelite $SB_EXTRA_ARGS
+ExecStart=/usr/bin/squeezelite \$SB_EXTRA_ARGS
 
 [Install]
 WantedBy=multi-user.target
