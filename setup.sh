@@ -4,6 +4,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 DEFAULT_CONFIG_FILE="./config.toml.default"
 CONFIG_FILE="./config.toml"
 SQUEEZELITE_ENV_FILE=".squeezelite_env"
+CONTROLLER_LOG_FILE=".controller.log"
+PLAYER_MACS_FILE=".player_macs"
 
 # user config version checking
 if [ ! -e $CONFIG_FILE ]; then
@@ -64,8 +66,6 @@ RestartSec=5
 WantedBy=multi-user.target
 "
 
-touch $SQUEEZELITE_ENV_FILE
-
 SQUEEZELITE_SERVICE="
 [Unit]
 Description=Squeezelite Player
@@ -81,6 +81,10 @@ ExecStart=/usr/bin/squeezelite \$SB_EXTRA_ARGS
 [Install]
 WantedBy=multi-user.target
 "
+
+touch $SQUEEZELITE_ENV_FILE
+touch $CONTROLLER_LOG_FILE
+touch $PLAYER_MACS_FILE
 
 echo "$LMS_SERVICE" | sudo tee /lib/systemd/system/lms-roomcontroller.service >/dev/null
 echo "$SQUEEZELITE_SERVICE" | sudo tee /lib/systemd/system/squeezelite-custom.service >/dev/null
