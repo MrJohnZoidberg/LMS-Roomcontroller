@@ -1,4 +1,5 @@
 import pexpect
+import logging
 
 
 class SqueezeliteControll:
@@ -10,7 +11,7 @@ class SqueezeliteControll:
 
     @staticmethod
     def write_environment_file(server, squeeze_mac, soundcard, name, timeout):
-        with open("./squeezelite.env", "w") as f:
+        with open("./squeezelite_env", "w") as f:
             args = [
                 f"-s {server} -m {squeeze_mac}",
                 f"-o {soundcard}",
@@ -23,22 +24,25 @@ class SqueezeliteControll:
     def service_start(self, server, squeeze_mac, soundcard, name, timeout):
         self.write_environment_file(server, squeeze_mac, soundcard, name, timeout)
         expect_list = [r"Failed to start", "could not be found", pexpect.EOF, pexpect.TIMEOUT]
+        logging.debug("Trying to start/restart squeezelite...")
         result = pexpect.spawnu(f"systemctl restart -f squeezelite-custom").expect(expect_list, 4) == 2
         if result:
-            print(f"Successfully started Squeezelite.")
+            logging.info(f"Successfully started Squeezelite.")
         else:
-            print(f"Failed to start Squeezelite.")
+            logging.info(f"Failed to start Squeezelite.")
         return result
 
     @staticmethod
     def service_stop():
         expect_list = [r"Failed to stop", "could not be found", pexpect.EOF, pexpect.TIMEOUT]
+        logging.debug("Trying to stop squeezelite...")
         result = pexpect.spawnu(f"systemctl stop -f squeezelite-custom").expect(expect_list, 4) == 2
         if not result:
+            logging.debug("No success, trying to kill squeezelite...")
             expect_list = [r"Failed to kill", "could not be found", pexpect.EOF, pexpect.TIMEOUT]
             result = pexpect.spawnu(f"systemctl kill squeezelite-custom").expect(expect_list, 4) == 2
         if result:
-            print(f"Successfully stopped Squeezelite.")
+            logging.info(f"Successfully stopped Squeezelite.")
         else:
-            print(f"Failed to stop Squeezelite.")
+            logging.info(f"Failed to stop Squeezelite.")
         return result
