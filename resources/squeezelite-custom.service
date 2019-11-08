@@ -5,7 +5,6 @@ After=network.target sound.target
 [Service]
 Nice=-10
 LimitRTPRIO=98
-LimitMEMLOCK=infinity
 PIDFile=/run/squeezelite.pid
 EnvironmentFile=-/etc/default/squeezelite
 
