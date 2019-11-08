@@ -11,6 +11,7 @@ if [ ! -e $CONFIG_FILE ]; then
     echo "A new config file was created from default config file: $CONFIG_FILE"
     echo "Please open this file now and set the values according to your needs."
     echo "After that, execute this setup file (./setup.sh) again."
+    exit 1
 else
     user_ver=$(grep "config_ver" $CONFIG_FILE | sed 's/^config_ver=\([0-9]\.[0-9]\)/\1/g')
     def_ver=$(grep "config_ver" $DEFAULT_CONFIG_FILE | sed 's/^config_ver=\([0-9]\.[0-9]\)/\1/g')
