@@ -5,14 +5,17 @@ DEFAULT_CONFIG_FILE="./config.toml.default"
 CONFIG_FILE="./config.toml"
 SQUEEZELITE_ENV_FILE=".squeezelite.env"
 
-if [ "$EUID" -ne 0 ]
-    then echo "Please run as root - Exiting..."
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root - Exiting..."
     exit 1
 fi
 
 # user config version checking
 if [ ! -e $CONFIG_FILE ]; then
     cp $DEFAULT_CONFIG_FILE $CONFIG_FILE
+    echo "A new config file was created from default config file: $CONFIG_FILE"
+    echo "Please open this file now and set the values according to your needs."
+    echo "After that, execute this setup file (./setup.sh) again."
 else
     user_ver=$(grep "config_ver" $CONFIG_FILE | sed 's/^config_ver=\([0-9]\.[0-9]\)/\1/g')
     def_ver=$(grep "config_ver" $DEFAULT_CONFIG_FILE | sed 's/^config_ver=\([0-9]\.[0-9]\)/\1/g')
