@@ -255,7 +255,7 @@ class Bluetooth:
         payload = {
             'room_name': self.room_name,
             'site_id': self.site_id,
-            'device_names': self.device_names,
+            'device_names': self.devices_names,
             'available_devices': available_devices,
             'paired_devices': self.bl_helper.get_paired_devices(),
             'connected_devices': [d for d in available_devices if d['mac_address'] in self.connected_devices]
