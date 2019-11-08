@@ -5,12 +5,6 @@ DEFAULT_CONFIG_FILE="./config.toml.default"
 CONFIG_FILE="./config.toml"
 SQUEEZELITE_ENV_FILE=".squeezelite.env"
 
-if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root (sudo ./setup.sh)"
-    echo "Exiting..."
-    exit 1
-fi
-
 # user config version checking
 if [ ! -e $CONFIG_FILE ]; then
     cp $DEFAULT_CONFIG_FILE $CONFIG_FILE
@@ -84,10 +78,10 @@ ExecStart=/usr/bin/squeezelite $SB_EXTRA_ARGS
 WantedBy=multi-user.target
 "
 
-echo "$LMS_SERVICE" | tee /lib/systemd/system/lms-roomcontroller.service
-echo "$SQUEEZELITE_SERVICE" | tee /lib/systemd/system/squeezelite-custom.service
-systemctl daemon-reload
-systemctl kill -f squeezelite
-systemctl disable squeezelite
-systemctl enable -f lms-roomcontroller
-systemctl start lms-roomcontroller
+echo "$LMS_SERVICE" | sudo tee /lib/systemd/system/lms-roomcontroller.service >/dev/null
+echo "$SQUEEZELITE_SERVICE" | sudo tee /lib/systemd/system/squeezelite-custom.service >/dev/null
+sudo systemctl daemon-reload
+sudo systemctl kill -f squeezelite
+sudo systemctl disable squeezelite
+sudo systemctl enable -f lms-roomcontroller
+sudo systemctl start lms-roomcontroller
