@@ -39,6 +39,7 @@ then
         # Create a virtual environment if it doesn't exist.
         $PYTHON -m venv $VENV
     fi
+    echo "Installing requirements with pip..."
     # Activate the virtual environment and install requirements.
     # shellcheck source=/dev/null
     . $VENV/bin/activate
