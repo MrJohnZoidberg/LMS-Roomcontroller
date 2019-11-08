@@ -106,5 +106,6 @@ venv.bak/
 .idea
 
 .squeezelite_macs
+.squeezelite_venv
 config.toml
 .controller.log
