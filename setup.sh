@@ -64,7 +64,7 @@ RestartSec=5
 WantedBy=multi-user.target
 "
 
-touch SQUEEZELITE_ENV_FILE
+touch $SQUEEZELITE_ENV_FILE
 
 SQUEEZELITE_SERVICE="
 [Unit]
