@@ -30,7 +30,7 @@ class FlowControll:
         try:
             with open(".player_macs", "rb") as f:
                 macs_file_dict = pickle.load(f)
-        except FileNotFoundError:
+        except (FileNotFoundError, EOFError):
             macs_file_dict = dict()
         if not devices_macs.get(device_name):
             macs_file_dict[device_name] = self.create_mac()
