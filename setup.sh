@@ -60,7 +60,7 @@ Type=idle
 WorkingDirectory=$DIR
 ExecStart=$DIR/venv/bin/python3 lms-roomcontroller.py
 Restart=on-failure
-RestartSec=5
+RestartSec=30
 
 [Install]
 WantedBy=multi-user.target
