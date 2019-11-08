@@ -33,6 +33,7 @@ class FlowControll:
                 macs_file_dict = pickle.load(f)
         except (FileNotFoundError, EOFError, pickle.UnpicklingError):
             macs_file_dict = dict()
+
         if devices_macs.get(device_name):
             macs_file_dict[device_name] = devices_macs.get(device_name)
             logging.debug(f"Took MAC for {device_name} from config: {macs_file_dict[device_name]}")
