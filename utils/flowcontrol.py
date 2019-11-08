@@ -28,7 +28,7 @@ class FlowControll:
 
     def get_squeezelite_mac(self, device_name, devices_macs):
         try:
-            with open(".squeezelite_macs", "rb") as f:
+            with open(".player_macs", "rb") as f:
                 macs_file_dict = pickle.load(f)
         except FileNotFoundError:
             macs_file_dict = dict()
