@@ -13,11 +13,11 @@ class FlowControll:
         self.config = config
         self.bltctl = bluetoothctl.Bluetooth(self.mqtt_client, self.config)
         self.sqectl = squeezelitectl.SqueezeliteControll()
-        self.msg_send_site_info(self.mqtt_client)
         self.devices_conf = self.config['devices']
         self.devices_names = {item: self.devices_conf[item] for item in self.devices_conf
                               if not isinstance(self.devices_conf[item], dict)}
         self.player_macs_dict = self.get_player_macs()
+        self.msg_send_site_info(self.mqtt_client)
 
     @staticmethod
     def create_mac():
