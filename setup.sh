@@ -74,9 +74,14 @@ After=network.target sound.target
 [Service]
 Nice=-10
 LimitRTPRIO=98
+LimitMEMLOCK=infinity
 PIDFile=/run/squeezelite.pid
 EnvironmentFile=-$DIR/$SQUEEZELITE_ENV_FILE
 ExecStart=/usr/bin/squeezelite \$SB_EXTRA_ARGS
+
+UMask=0002
+User=pi
+Group=pi
 
 [Install]
 WantedBy=multi-user.target
