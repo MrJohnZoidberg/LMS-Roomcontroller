@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# TODO: Color echo outputs
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 DEFAULT_CONFIG_FILE="./config.toml.default"
 CONFIG_FILE="./config.toml"
