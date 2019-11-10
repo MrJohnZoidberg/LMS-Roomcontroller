@@ -31,6 +31,19 @@ else
     fi
 fi
 
+# install packages
+echo "Installing required packages... (libev4 libfaad2 liblirc-client0 libmad0 libuv1 libwebsockets8)"
+sudo apt autoremove -y squeezelite
+sudo apt install -y libev4 libfaad2 liblirc-client0 libmad0 libuv1 libwebsockets8
+echo "Downloading squeezeplayer 1.9.6 from sourceforge (in Raspbian repos it is version 1.8, too much bugs)..."
+wget https://liquidtelecom.dl.sourceforge.net/project/lmsclients/squeezelite/linux/squeezelite-1.9.6.1198-armv6hf.tar.gz
+echo "Unpacking tar file..."
+tar -xvzf squeezelite-1.9.6.1198-armv6hf.tar.gz
+echo "Copying squeezelite binary to /usr/bin/squeezelite in system..."
+sudo cp ./squeezelite /usr/bin/squeezelite
+sudo chmod +x /usr/bin/squeezelite
+rm -rf LICENSE.txt LIBS.txt
+
 PYTHON=$(command -v python3)
 VENV=venv
 
@@ -91,10 +104,15 @@ touch $SQUEEZELITE_ENV_FILE
 touch $CONTROLLER_LOG_FILE
 touch $PLAYER_MACS_FILE
 
+# create services
+echo "Creating systemd services (lms-roomcontroller.service and squeezelite-custom.service)..."
 echo "$LMS_SERVICE" | sudo tee /lib/systemd/system/lms-roomcontroller.service >/dev/null
 echo "$SQUEEZELITE_SERVICE" | sudo tee /lib/systemd/system/squeezelite-custom.service >/dev/null
 sudo systemctl daemon-reload
 sudo systemctl kill -f squeezelite
 sudo systemctl disable squeezelite
+echo "Enabling lms-roomcontroller service..."
 sudo systemctl enable -f lms-roomcontroller
+echo "Starting lms-roomcontroller service..."
 sudo systemctl restart lms-roomcontroller
+echo "Finished successfully."
