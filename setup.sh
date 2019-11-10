@@ -42,7 +42,7 @@ tar -xvzf squeezelite-1.9.6.1198-armv6hf.tar.gz
 echo "Copying squeezelite binary to /usr/bin/squeezelite in system..."
 sudo cp ./squeezelite /usr/bin/squeezelite
 sudo chmod +x /usr/bin/squeezelite
-rm -rf LICENSE.txt LIBS.txt
+rm -rf LICENSE.txt LIBS.txt squeezelite-1.9.6.1198-armv6hf.tar.gz
 
 PYTHON=$(command -v python3)
 VENV=venv
