@@ -9,9 +9,3 @@ sudo apt install snips-injection bluealsa pulseaudio-module-bluetooth
 sudo adduser pi bluetooth
 sudo reboot
 ```
-
-```bash
-sudo apt install squeezelite
-sudo systemctl disable squeezelite
-sudo systemctl stop squeezelite
-```
