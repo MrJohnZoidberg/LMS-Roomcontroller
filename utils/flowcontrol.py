@@ -101,7 +101,7 @@ class FlowControll:
 
     @staticmethod
     def thread_wait_few_seconds(client, payload):
-        time.sleep(4)
+        time.sleep(2)
         client.publish('squeezebox/answer/serviceStart', payload=json.dumps(payload))
 
     def msg_service_start(self, *args):
