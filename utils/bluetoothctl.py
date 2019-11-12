@@ -142,6 +142,8 @@ class Bluetooth:
             }
             self.mqtt_client.publish('bluetooth/answer/deviceDisconnect', payload=json.dumps(payload))
             self.send_blt_info()
+        if addr in self.threadobjs_wait_disconnect:
+            del self.threadobjs_wait_disconnect[addr]
 
     def thread_discover(self):
         result = self.bl_helper.start_discover()
