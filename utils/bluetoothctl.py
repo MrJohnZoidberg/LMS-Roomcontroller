@@ -2,6 +2,7 @@ import threading
 import time
 import json
 import pexpect
+import logging
 
 
 class BluetoothHelper:
@@ -128,9 +129,10 @@ class Bluetooth:
     def thread_wait_until_disconnect(self, addr):
         connected = True
         while connected:
-            time.sleep(5)
+            time.sleep(10)
             if not self.bl_helper.is_connected(addr):
                 connected = False
+            logging.debug(f"({addr}) connected: {connected}")
         if addr in self.connected_devices:
             del self.connected_devices[addr]
             payload = {
