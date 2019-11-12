@@ -124,7 +124,19 @@ class Bluetooth:
         self.devices_names = [item for item in config['devices'] if not isinstance(config['devices'][item], dict)]
         self.devices_names = {item: config['devices'][item] for item in config['devices']
                               if not isinstance(config['devices'][item], dict)}
+        self.fill_connected_devices()
         self.send_blt_info()
+
+    def fill_connected_devices(self):
+        for d in self.bl_helper.get_paired_devices():
+            addr = d['mac_address']
+            if self.bl_helper.is_connected(addr):
+                self.connected_devices[addr] = d['name']
+                if addr not in self.threadobjs_wait_disconnect:
+                    thread_obj = threading.Thread(target=self.thread_wait_until_disconnect, args=(addr,))
+                    self.threadobjs_wait_disconnect[addr] = thread_obj
+                    self.threadobjs_wait_disconnect[addr].start()
+            time.sleep(0.2)
 
     def thread_wait_until_disconnect(self, addr):
         connected = True
