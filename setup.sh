@@ -39,7 +39,7 @@ echo "${green}Removing old squeezelite package...${reset}"
 sudo apt autoremove -y squeezelite
 echo "${green}Downloading squeezelite source from github.com/MrJohnZoidberg...${reset}"
 git clone https://github.com/MrJohnZoidberg/squeezelite.git
-cd squeezelite || echo "${red}Failed to download squeezelite source. Exit.${reset}" && exit
+cd squeezelite || { echo "${red}Failed to download squeezelite source. Exit.${reset}"; exit; }
 echo "${green}Installing build dependencies...${reset}"
 sudo apt install -y libasound2-dev libflac-dev libmad0-dev libvorbis-dev libmpg123-dev libfaad-dev
 echo "${green}Compiling binary file...${reset}"
