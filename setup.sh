@@ -116,7 +116,6 @@ echo "${green}Creating systemd services (lms-roomcontroller.service and squeezel
 echo "$LMS_SERVICE" | sudo tee /lib/systemd/system/lms-roomcontroller.service >/dev/null
 echo "$SQUEEZELITE_SERVICE" | sudo tee /lib/systemd/system/squeezelite-custom.service >/dev/null
 sudo systemctl daemon-reload
-sudo systemctl kill -f squeezelite
 sudo systemctl disable squeezelite
 echo "${green}Enabling lms-roomcontroller service...${reset}"
 sudo systemctl enable -f lms-roomcontroller
