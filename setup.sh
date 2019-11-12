@@ -44,6 +44,9 @@ echo "${green}Installing build dependencies...${reset}"
 sudo apt install -y libasound2-dev libflac-dev libmad0-dev libvorbis-dev libmpg123-dev libfaad-dev
 echo "${green}Compiling binary file...${reset}"
 make
+echo "${green}Stopping running services that have /usr/bin/squeezelite open...${reset}"
+sudo systemctl stop squeezelite
+sudo systemctl stop squeezelite-custom
 echo "${green}Copying squeezelite binary to /usr/bin/squeezelite in system...${reset}"
 sudo cp ./squeezelite /usr/bin/squeezelite
 cd ..
