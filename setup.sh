@@ -92,8 +92,8 @@ Description=Squeezelite Player
 After=network.target sound.target
 
 [Service]
-Nice=-20
-LimitRTPRIO=infinity
+Nice=-10
+LimitRTPRIO=98
 LimitMEMLOCK=infinity
 PIDFile=/run/squeezelite.pid
 EnvironmentFile=-$DIR/$SQUEEZELITE_ENV_FILE
