@@ -62,7 +62,7 @@ fi
 
 if [ "" == "$(dpkg -s python3-venv | grep installed)" ]; then
     echo "${green}Installing python3-venv for virtual environment...${reset}"
-    sudo apt-get --force-yes --yes install python3-venv python3.7-venv
+    sudo apt-get install -y python3-venv python3.7-venv
 fi
 
 echo "${green}Installing requirements with pip...${reset}"
