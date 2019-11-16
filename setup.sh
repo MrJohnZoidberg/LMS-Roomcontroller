@@ -38,30 +38,25 @@ else
     fi
 fi
 
-if [ $pulseaudio -eq 0 ]; then
-  # install packages
-  echo "${green}Installing required packages... (libev4 libfaad2 liblirc-client0 libmad0 libuv1 libwebsockets8)${reset}"
-  sudo apt install -y libev4 libfaad2 liblirc-client0 libmad0 libuv1 libwebsockets8
-  echo "${green}Removing old squeezelite package...${reset}"
-  sudo apt autoremove -y squeezelite
-  echo "${green}Downloading squeezelite source from github.com/MrJohnZoidberg...${reset}"
-  git clone https://github.com/MrJohnZoidberg/squeezelite.git
-  cd squeezelite || { echo "${red}Failed to download squeezelite source. Exit.${reset}"; exit; }
-  echo "${green}Installing build dependencies...${reset}"
-  sudo apt install -y libasound2-dev libflac-dev libmad0-dev libvorbis-dev libmpg123-dev libfaad-dev
-  echo "${green}Compiling binary file...${reset}"
-  make
-  echo "${green}Stopping running services that have /usr/bin/squeezelite open...${reset}"
-  sudo systemctl stop squeezelite
-  sudo systemctl stop squeezelite-custom
-  echo "${green}Copying squeezelite binary to /usr/bin/squeezelite in system...${reset}"
-  sudo cp ./squeezelite /usr/bin/squeezelite
-  cd ..
-  rm -rf squeezelite
-else
-  echo "${green}Installing squeezelite-pa package...${reset}"
-  sudo apt install -y squeezelite-pa
-fi
+# install packages
+echo "${green}Installing required packages... (libev4 libfaad2 liblirc-client0 libmad0 libuv1 libwebsockets8)${reset}"
+sudo apt install -y libev4 libfaad2 liblirc-client0 libmad0 libuv1 libwebsockets8
+echo "${green}Removing old squeezelite package...${reset}"
+sudo apt autoremove -y squeezelite
+echo "${green}Downloading squeezelite source from github.com/MrJohnZoidberg...${reset}"
+git clone https://github.com/MrJohnZoidberg/squeezelite.git
+cd squeezelite || { echo "${red}Failed to download squeezelite source. Exit.${reset}"; exit; }
+echo "${green}Installing build dependencies...${reset}"
+sudo apt install -y libasound2-dev libflac-dev libmad0-dev libvorbis-dev libmpg123-dev libfaad-dev
+echo "${green}Compiling binary file...${reset}"
+make
+echo "${green}Stopping running services that have /usr/bin/squeezelite open...${reset}"
+sudo systemctl stop squeezelite
+sudo systemctl stop squeezelite-custom
+echo "${green}Copying squeezelite binary to /usr/bin/squeezelite in system...${reset}"
+sudo cp ./squeezelite /usr/bin/squeezelite
+cd ..
+rm -rf squeezelite
 
 PYTHON=$(command -v python3)
 VENV=venv
