@@ -12,12 +12,6 @@ green=$(tput setaf 2)
 yellow=$(tput setaf 3)
 reset=$(tput sgr0)
 
-if [ "$1" == "--pulse" ]; then
-    pulseaudio=1
-else
-    pulseaudio=0
-fi
-
 # user config version checking
 if [ ! -e $CONFIG_FILE ]; then
     cp $DEFAULT_CONFIG_FILE $CONFIG_FILE
@@ -97,14 +91,6 @@ RestartSec=30
 WantedBy=multi-user.target
 "
 
-if [ $pulseaudio -eq 0 ]; then
-    squeezelite_user="pi"
-    squeezelite_group="pi"
-else
-    squeezelite_user="pulse"
-    squeezelite_group="pulse"
-fi
-
 SQUEEZELITE_SERVICE="
 [Unit]
 Description=Squeezelite Player
@@ -119,8 +105,8 @@ EnvironmentFile=-$DIR/$SQUEEZELITE_ENV_FILE
 ExecStart=/usr/bin/squeezelite \$SB_EXTRA_ARGS
 
 UMask=0002
-User=$squeezelite_user
-Group=$squeezelite_group
+User=pi
+Group=pi
 
 [Install]
 WantedBy=multi-user.target
