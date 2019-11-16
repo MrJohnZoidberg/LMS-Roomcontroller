@@ -12,6 +12,12 @@ green=$(tput setaf 2)
 yellow=$(tput setaf 3)
 reset=$(tput sgr0)
 
+if [ "$1" == "--pulse" ]; then
+    pulseaudio=1
+else
+    pulseaudio=0
+fi
+
 # user config version checking
 if [ ! -e $CONFIG_FILE ]; then
     cp $DEFAULT_CONFIG_FILE $CONFIG_FILE
@@ -32,25 +38,30 @@ else
     fi
 fi
 
-# install packages
-echo "${green}Installing required packages... (libev4 libfaad2 liblirc-client0 libmad0 libuv1 libwebsockets8)${reset}"
-sudo apt install -y libev4 libfaad2 liblirc-client0 libmad0 libuv1 libwebsockets8
-echo "${green}Removing old squeezelite package...${reset}"
-sudo apt autoremove -y squeezelite
-echo "${green}Downloading squeezelite source from github.com/MrJohnZoidberg...${reset}"
-git clone https://github.com/MrJohnZoidberg/squeezelite.git
-cd squeezelite || { echo "${red}Failed to download squeezelite source. Exit.${reset}"; exit; }
-echo "${green}Installing build dependencies...${reset}"
-sudo apt install -y libasound2-dev libflac-dev libmad0-dev libvorbis-dev libmpg123-dev libfaad-dev
-echo "${green}Compiling binary file...${reset}"
-make
-echo "${green}Stopping running services that have /usr/bin/squeezelite open...${reset}"
-sudo systemctl stop squeezelite
-sudo systemctl stop squeezelite-custom
-echo "${green}Copying squeezelite binary to /usr/bin/squeezelite in system...${reset}"
-sudo cp ./squeezelite /usr/bin/squeezelite
-cd ..
-rm -rf squeezelite
+if [ $pulseaudio -eq 0 ]; then
+  # install packages
+  echo "${green}Installing required packages... (libev4 libfaad2 liblirc-client0 libmad0 libuv1 libwebsockets8)${reset}"
+  sudo apt install -y libev4 libfaad2 liblirc-client0 libmad0 libuv1 libwebsockets8
+  echo "${green}Removing old squeezelite package...${reset}"
+  sudo apt autoremove -y squeezelite
+  echo "${green}Downloading squeezelite source from github.com/MrJohnZoidberg...${reset}"
+  git clone https://github.com/MrJohnZoidberg/squeezelite.git
+  cd squeezelite || { echo "${red}Failed to download squeezelite source. Exit.${reset}"; exit; }
+  echo "${green}Installing build dependencies...${reset}"
+  sudo apt install -y libasound2-dev libflac-dev libmad0-dev libvorbis-dev libmpg123-dev libfaad-dev
+  echo "${green}Compiling binary file...${reset}"
+  make
+  echo "${green}Stopping running services that have /usr/bin/squeezelite open...${reset}"
+  sudo systemctl stop squeezelite
+  sudo systemctl stop squeezelite-custom
+  echo "${green}Copying squeezelite binary to /usr/bin/squeezelite in system...${reset}"
+  sudo cp ./squeezelite /usr/bin/squeezelite
+  cd ..
+  rm -rf squeezelite
+else
+  echo "${green}Installing squeezelite-pa package...${reset}"
+  sudo apt install -y squeezelite-pa
+fi
 
 PYTHON=$(command -v python3)
 VENV=venv
@@ -91,6 +102,14 @@ RestartSec=30
 WantedBy=multi-user.target
 "
 
+if [ $pulseaudio -eq 0 ]; then
+    squeezelite_user="pi"
+    squeezelite_group="pi"
+else
+    squeezelite_user="pulse"
+    squeezelite_group="pulse"
+fi
+
 SQUEEZELITE_SERVICE="
 [Unit]
 Description=Squeezelite Player
@@ -105,8 +124,8 @@ EnvironmentFile=-$DIR/$SQUEEZELITE_ENV_FILE
 ExecStart=/usr/bin/squeezelite \$SB_EXTRA_ARGS
 
 UMask=0002
-User=pi
-Group=pi
+User=$squeezelite_user
+Group=$squeezelite_group
 
 [Install]
 WantedBy=multi-user.target
